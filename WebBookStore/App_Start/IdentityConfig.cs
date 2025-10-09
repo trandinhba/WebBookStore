@@ -14,7 +14,7 @@ using WebBookStore.Models;
 
 namespace WebBookStore
 {
-    public class EmailService : IIdentityMessageService
+    public class IdentityEmailService : IIdentityMessageService
     {
         public Task SendAsync(IdentityMessage message)
         {
@@ -76,7 +76,7 @@ namespace WebBookStore
                 Subject = "Security Code",
                 BodyFormat = "Your security code is {0}"
             });
-            manager.EmailService = new EmailService();
+            manager.EmailService = new IdentityEmailService();
             manager.SmsService = new SmsService();
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)

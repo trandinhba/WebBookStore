@@ -1,4 +1,6 @@
 ﻿/* Set padding to keep content from hitting the edges */
+html, body { font-family: 'Be Vietnam Pro','Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
+
 .body-content {
     margin-top: 15px;
     padding-left: 15px;
@@ -18,3 +20,24 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/* Header adjustments */
+.navbar-brand strong { letter-spacing: .2px; }
+
+/* Section title bar */
+.section-title {
+    background-color: #2a72b5;
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+/* Best-selling grid cards */
+.book-card { transition: transform .15s ease, box-shadow .15s ease; }
+.book-card:hover { transform: translateY(-2px); box-shadow: 0 .25rem .75rem rgba(0,0,0,.08); }
+.book-title { font-weight: 600; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; }
+
+/* Carousel indicators mimic small dots below hero */
+.indicator-dot { width: 8px; height: 8px; border-radius: 50%; background: #cfd8e3; display: inline-block; }
+.indicator-dot.active { background: #7aa7d9; }

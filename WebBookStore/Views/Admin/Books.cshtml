@@ -1,7 +1,65 @@
 ﻿
 @{
-    ViewBag.Title = "Books";
+    ViewBag.Title = "Quản lý Sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Books</h2>
+<div class="container py-3">
+    <h4 class="mb-3">Quản lý Sách</h4>
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Tên sách</th>
+                <th>NXB</th>
+                <th>Giá</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Sword Art Online Progressive Vol 7</td>
+                <td>IPM, Hà Nội</td>
+                <td>120.000 Đ</td>
+                <td><a class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editBookModal">Sửa</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBookModalLabel">Chi tiết sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">Tên sách</label>
+                    <input class="form-control" value="Sword Art Online Progressive Vol 7" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Nhà xuất bản</label>
+                    <input class="form-control" value="IPM, Hà Nội" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Tác giả</label>
+                    <input class="form-control" value="REKI KAWAHARA" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Giá</label>
+                    <input class="form-control" value="120000" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Mô tả</label>
+                    <input class="form-control" value="Đề tài Sword Art Online có không gian kẻ chuyến rất rộng, lạ lẫm..." />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary">Sửa</button>
+            </div>
+        </div>
+    </div>
+</div>
 

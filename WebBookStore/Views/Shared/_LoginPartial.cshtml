@@ -1,7 +1,22 @@
-﻿
-@{
-    ViewBag.Title = "_LoginPartial";
+﻿@{
+    ViewBag.Title = "Login";
 }
 
-<h2>_LoginPartial</h2>
+<form method="post" action="@Url.Action("Login", "Account")">
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" name="Email" id="Email" class="form-control" required />
+    </div>
 
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input type="password" name="Password" id="Password" class="form-control" required />
+    </div>
+
+    <div class="form-check mb-3">
+        <input type="checkbox" name="RememberMe" id="RememberMe" class="form-check-input" />
+        <label class="form-check-label" for="RememberMe">Remember account</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Login</button>
+</form>

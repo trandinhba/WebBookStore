@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WebBookStore.Services
+﻿namespace WebBookStore.Services
 {
-    internal interface IEmailService
+    public interface IEmailService
     {
+        void SendOrderConfirmation(int orderId);
+        void SendPasswordReset(string email, string resetLink);
+        void SendWelcomeEmail(string email, string username);
     }
 }

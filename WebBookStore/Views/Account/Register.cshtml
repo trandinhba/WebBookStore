@@ -1,7 +1,40 @@
 ﻿
 @{
     ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Register</h2>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Register</h4>
+                    @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input name="Email" class="form-control" type="email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input name="PhoneNumber" class="form-control" type="tel" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input name="Password" class="form-control" type="password" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input name="ConfirmPassword" class="form-control" type="password" required />
+                        </div>
+                        <div class="text-muted small mb-2">By register, you agreed with Sach50 about services and terms of service and privacy policy</div>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 

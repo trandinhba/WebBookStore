@@ -1,7 +1,35 @@
 ﻿
 @{
     ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Login</h2>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Login</h4>
+                    @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input name="Email" class="form-control" type="email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pass word</label>
+                            <input name="Password" class="form-control" type="password" required />
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="true" id="rememberMePage" name="RememberMe">
+                            <label class="form-check-label" for="rememberMePage">Remember</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
