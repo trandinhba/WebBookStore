@@ -47,11 +47,15 @@
         {
             <div class="col-6 col-sm-4 col-md-3 col-lg-3">
                 <a class="card h-100 book-card text-decoration-none" href="#">
-                    <img class="card-img-top object-fit-cover" style="height: 220px;" src="https://picsum.photos/seed/@i/400/600" alt="Book" />
+                    <!-- Thay đường dẫn ảnh mẫu bằng đường dẫn ảnh PNG thực tế từ thư mục wwwroot/images -->
+                    <img class="card-img-top object-fit-cover" style="height: 220px;"
+                         src="@Url.Content("/wwwroot/images/tap" + (i+1) + ".png")" alt="Tập @(i+1)" />
                     <div class="card-body p-2">
-                        <div class="book-title">Sword Art Online Progressive</div>
-                        <div class="text-muted small">Tập @(i+1)</div>
-                        <div class="fw-bold mt-1 text-dark">@String.Format("{0:N0} Đ", (i % 3 == 0 ? 120000 : (i % 3 == 1 ? 115000 : 100000)))</div>
+                        <div class="book-title">Sword Art Online Progressive</div> <!-- Tên sách -->
+                        <div class="text-muted small">Tập @(i+1)</div> <!-- Tập sách -->
+                        <div class="fw-bold mt-1 text-dark">
+                            @String.Format("{0:N0} Đ", (i % 3 == 0 ? 120000 : (i % 3 == 1 ? 115000 : 100000))) <!-- Giá -->
+                        </div>
                     </div>
                 </a>
             </div>

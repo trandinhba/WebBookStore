@@ -66,11 +66,11 @@ namespace WebBookStore.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng");
+            ModelState.AddModelError("", "Incorrect username or password");
             ViewBag.ReturnUrl = returnUrl;
             if (Request.IsAjaxRequest())
             {
-                return Json(new { ok = false, errors = new[] { "Tên đăng nhập hoặc mật khẩu không đúng" } }, JsonRequestBehavior.AllowGet);
+                return Json(new { ok = false, errors = new[] { "Incorrect username or password" } }, JsonRequestBehavior.AllowGet);
             }
             return View();
         }
@@ -100,17 +100,17 @@ namespace WebBookStore.Controllers
 
             if (user.PasswordHash != confirmPassword)
             {
-                ModelState.AddModelError("confirmPassword", "Mật khẩu xác nhận không khớp");
+                ModelState.AddModelError("confirmPassword", "The confirm password does not match");
             }
 
             if (_context.Users.Any(u => u.Username == user.Username))
             {
-                ModelState.AddModelError("Username", "Tên tài khoản đã tồn tại");
+                ModelState.AddModelError("Username", "Username already exists");
             }
 
             if (_context.Users.Any(u => u.Email == user.Email))
             {
-                ModelState.AddModelError("Email", "Email đã được sử dụng");
+                ModelState.AddModelError("Email", "Email is already in use");
             }
 
             if (!ModelState.IsValid)
@@ -118,7 +118,7 @@ namespace WebBookStore.Controllers
                 if (Request.IsAjaxRequest())
                 {
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).Where(m => !string.IsNullOrWhiteSpace(m)).ToArray();
-                    return Json(new { ok = false, errors = errors.Length > 0 ? errors : new[] { "Dữ liệu không hợp lệ" } }, JsonRequestBehavior.AllowGet);
+                    return Json(new { ok = false, errors = errors.Length > 0 ? errors : new[] { "Invalid data" } }, JsonRequestBehavior.AllowGet);
                 }
                 return View(user);
             }
@@ -138,7 +138,7 @@ namespace WebBookStore.Controllers
             {
                 return Json(new { ok = true }, JsonRequestBehavior.AllowGet);
             }
-            TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+            TempData["Success"] = "Registration successful! Please log in.";
             return RedirectToAction("Login");
         }
 
@@ -186,7 +186,7 @@ namespace WebBookStore.Controllers
 
             _context.SaveChanges();
 
-            TempData["Success"] = "Cập nhật thông tin thành công";
+            TempData["Success"] = "Profile updated successfully";
             return RedirectToAction("Profile");
         }
 
@@ -208,12 +208,12 @@ namespace WebBookStore.Controllers
 
             if (!VerifyPassword(currentPassword, user.PasswordHash))
             {
-                ModelState.AddModelError("currentPassword", "Mật khẩu hiện tại không đúng");
+                ModelState.AddModelError("currentPassword", "Current password is incorrect");
             }
 
             if (newPassword != confirmPassword)
             {
-                ModelState.AddModelError("confirmPassword", "Mật khẩu xác nhận không khớp");
+                ModelState.AddModelError("confirmPassword", "Confirm password does not match");
             }
 
             if (!ModelState.IsValid)
@@ -224,7 +224,7 @@ namespace WebBookStore.Controllers
             user.PasswordHash = HashPassword(newPassword);
             _context.SaveChanges();
 
-            TempData["Success"] = "Đổi mật khẩu thành công";
+            TempData["Success"] = "Password changed successfully";
             return RedirectToAction("Profile");
         }
 
