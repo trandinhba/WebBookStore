@@ -8,8 +8,8 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang Chủ</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Books" asp-action="Index">Sách</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Books")">Sách</a></li>
             <li class="breadcrumb-item active">@Model.Title</li>
         </ol>
     </nav>
@@ -18,27 +18,30 @@
     <div class="row g-4">
         <div class="col-md-4">
             <div class="position-relative">
-                <img class="img-fluid rounded shadow-sm w-100" src="@Model.CoverImageUrl" alt="@Model.Title" />
-                @if (Model.Stock <= 0)
+                <img class="img-fluid rounded shadow-sm w-100" src="@Model.ImageUrl" alt="@Model.Title" />
+                @if (Model.StockQuantity <= 0)
                 {
                     <div class="position-absolute top-0 start-0 badge bg-danger m-2">Hết hàng</div>
                 }
-                else if (Model.Stock < 10)
+                else if (Model.StockQuantity < 10)
                 {
-                    <div class="position-absolute top-0 start-0 badge bg-warning m-2">Còn @Model.Stock</div>
+                    <div class="position-absolute top-0 start-0 badge bg-warning m-2">Còn @Model.StockQuantity</div>
                 }
             </div>
         </div>
+
         <div class="col-md-8">
             <h3 class="fw-semibold mb-3">@Model.Title</h3>
+
             <div class="mb-2">
                 <span class="text-muted">Nhà Xuất Bản:</span>
-                <a href="#" class="text-primary text-decoration-none">@Model.Publisher</a>
+                <span class="text-primary">@Model.Publisher</span>
             </div>
             <div class="mb-2">
                 <span class="text-muted">Tác Giả:</span>
-                <a href="#" class="text-primary text-decoration-none">@Model.Author</a>
+                <span class="text-primary">@Model.Author</span>
             </div>
+
             <div class="mb-3">
                 @for (var i = 1; i <= 5; i++)
                 {
@@ -51,17 +54,22 @@
                         <i class="bi bi-star text-warning"></i>
                     }
                 }
-                <span class="text-muted ms-2">(@Model.TotalRatings đánh giá)</span>
+                <span class="text-muted ms-2">(@Model.ReviewCount đánh giá)</span>
             </div>
 
-            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice.Value > Model.Price)
+            @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price)
             {
+                var discountPercent = Math.Round(100 - (Model.DiscountPrice.Value / Model.Price * 100), 0);
                 <div class="mb-2">
-                    <span class="text-decoration-line-through text-muted fs-5">@String.Format("{0:N0} ₫", Model.OriginalPrice)</span>
-                    <span class="badge bg-danger ms-2">-@Model.DiscountPercentage%</span>
+                    <span class="text-decoration-line-through text-muted fs-5">@String.Format("{0:N0} ₫", Model.Price)</span>
+                    <span class="badge bg-danger ms-2">-@discountPercent%</span>
                 </div>
+                <div class="display-6 fw-bold text-primary mb-4">@String.Format("{0:N0} ₫", Model.DiscountPrice)</div>
             }
-            <div class="display-6 fw-bold text-primary mb-4">@String.Format("{0:N0} ₫", Model.Price)</div>
+            else
+            {
+                <div class="display-6 fw-bold text-primary mb-4">@String.Format("{0:N0} ₫", Model.Price)</div>
+            }
 
             <div class="d-flex align-items-center gap-3 mb-3">
                 <span class="text-muted">Số lượng:</span>
@@ -69,27 +77,27 @@
                     <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(-1)">
                         <i class="bi bi-dash"></i>
                     </button>
-                    <input id="qty" type="number" class="form-control text-center" value="1" min="1" max="@Model.Stock" />
+                    <input id="qty" type="number" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" />
                     <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(1)">
                         <i class="bi bi-plus"></i>
                     </button>
                 </div>
-                <span class="text-muted small">(@Model.Stock sản phẩm có sẵn)</span>
+                <span class="text-muted small">(@Model.StockQuantity sản phẩm có sẵn)</span>
             </div>
 
             <div class="d-flex gap-3 mb-3">
-                <button class="btn btn-primary px-4" onclick="buyNow(@Model.Id)" @(Model.Stock <= 0 ? "disabled" : "")>
+                <button class="btn btn-primary px-4" onclick="buyNow(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
                     <i class="bi bi-cart-check me-2"></i>Mua Ngay
                 </button>
-                <button class="btn btn-outline-primary px-4" onclick="addToCart(@Model.Id)" @(Model.Stock <= 0 ? "disabled" : "")>
+                <button class="btn btn-outline-primary px-4" onclick="addToCart(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
                     <i class="bi bi-bag-plus me-2"></i>Thêm Giỏ Hàng
                 </button>
-                <button class="btn btn-outline-secondary" onclick="addToWishlist(@Model.Id)">
+                <button class="btn btn-outline-secondary" onclick="addToWishlist(@Model.BookId)">
                     <i class="bi bi-heart"></i>
                 </button>
             </div>
 
-            @if (Model.Stock <= 0)
+            @if (Model.StockQuantity <= 0)
             {
                 <div class="alert alert-danger" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>Sản phẩm hiện tại đã hết hàng
@@ -108,19 +116,19 @@
                         <dt class="col-sm-5 text-muted">Mã Sách:</dt>
                         <dd class="col-sm-7">@Model.ISBN</dd>
                         <dt class="col-sm-5 text-muted">Nhà Xuất Bản:</dt>
-                        <dd class="col-sm-7"><a href="#" class="text-primary text-decoration-none">@Model.Publisher</a></dd>
+                        <dd class="col-sm-7">@Model.Publisher</dd>
                         <dt class="col-sm-5 text-muted">Tác Giả:</dt>
-                        <dd class="col-sm-7"><a href="#" class="text-primary text-decoration-none">@Model.Author</a></dd>
+                        <dd class="col-sm-7">@Model.Author</dd>
                     </dl>
                 </div>
                 <div class="col-md-6">
                     <dl class="row mb-2">
                         <dt class="col-sm-5 text-muted">Năm Xuất Bản:</dt>
-                        <dd class="col-sm-7">@(Model.PublicationDate.HasValue ? Model.PublicationDate.Value.Year.ToString() : "N/A")</dd>
+                        <dd class="col-sm-7">@Model.PublishYear</dd>
                         <dt class="col-sm-5 text-muted">Ngôn Ngữ:</dt>
-                        <dd class="col-sm-7">Tiếng Việt</dd>
+                        <dd class="col-sm-7">@Model.Language</dd>
                         <dt class="col-sm-5 text-muted">Thể loại:</dt>
-                        <dd class="col-sm-7">@Model.Genre</dd>
+                        <dd class="col-sm-7">@Model.Category?.Name</dd>
                     </dl>
                 </div>
             </div>
@@ -154,13 +162,13 @@
                             }
                         }
                     </div>
-                    <div class="text-muted">@Model.TotalRatings đánh giá</div>
+                    <div class="text-muted">@Model.ReviewCount đánh giá</div>
                 </div>
                 <div class="col-md-5">
                     @for (var star = 5; star >= 1; star--)
                     {
                         var count = Model.Reviews != null ? Model.Reviews.Count(r => r.Rating == star) : 0;
-                        var percentage = Model.TotalRatings > 0 ? (count * 100.0 / Model.TotalRatings) : 0;
+                        var percentage = Model.ReviewCount > 0 ? (count * 100.0 / Model.ReviewCount) : 0;
                         <div class="d-flex align-items-center mb-2">
                             <span class="me-2" style="width: 30px;">@star <i class="bi bi-star-fill text-warning"></i></span>
                             <div class="progress flex-grow-1" style="height: 8px;">
@@ -183,7 +191,7 @@
             <div id="reviewsList">
                 @if (Model.Reviews != null && Model.Reviews.Any())
                 {
-                    foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+                    foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedDate))
                     {
                         <div class="review-item border-bottom pb-3 mb-3">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -203,7 +211,7 @@
                                         }
                                     </div>
                                 </div>
-                                <small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
                             </div>
                             <p class="mb-0">@review.Comment</p>
                         </div>
@@ -231,9 +239,9 @@
             </div>
             <div class="modal-body">
                 <form id="reviewForm">
-                    <input type="hidden" id="bookId" value="@Model.Id">
+                    <input type="hidden" id="bookId" value="@Model.BookId">
                     <div class="mb-3">
-                        <label class="form-label">Đánh giá của bạn: <span class="text-danger">*</span></label>
+                        <label class="form-label">Đánh giá của bạn:</label>
                         <div class="rating-input mb-2">
                             @for (var i = 1; i <= 5; i++)
                             {
@@ -244,8 +252,8 @@
                         <div class="invalid-feedback" id="ratingError">Vui lòng chọn số sao đánh giá</div>
                     </div>
                     <div class="mb-3">
-                        <label for="comment" class="form-label">Nhận xét: <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." required></textarea>
+                        <label for="comment" class="form-label">Nhận xét:</label>
+                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..." required></textarea>
                         <div class="invalid-feedback">Vui lòng nhập nhận xét của bạn</div>
                     </div>
                 </form>
@@ -289,185 +297,61 @@
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
     }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        opacity: 1;
-    }
 </style>
 
 @section scripts {
     <script>
-    // Tăng giảm số lượng
-    function qtyStep(n) {
-        var el = document.getElementById('qty');
-        var max = parseInt(el.getAttribute('max'));
-        var v = parseInt(el.value || '1', 10) + n;
-        if (v < 1) v = 1;
-        if (v > max) v = max;
-        el.value = v;
-    }
-
-    // Chọn rating
-    document.querySelectorAll('.rating-star').forEach((star, index) => {
-        star.addEventListener('click', function() {
-            const rating = parseInt(this.getAttribute('data-rating'));
-            document.getElementById('ratingValue').value = rating;
-
-            // Cập nhật hiển thị sao
-            document.querySelectorAll('.rating-star').forEach((s, i) => {
-                if (i < rating) {
-                    s.classList.remove('bi-star');
-                    s.classList.add('bi-star-fill', 'active');
-                } else {
-                    s.classList.remove('bi-star-fill', 'active');
-                    s.classList.add('bi-star');
-                }
-            });
-
-            document.getElementById('ratingError').style.display = 'none';
-        });
-
-        // Hiệu ứng hover
-        star.addEventListener('mouseenter', function() {
-            const rating = parseInt(this.getAttribute('data-rating'));
-            document.querySelectorAll('.rating-star').forEach((s, i) => {
-                if (i < rating) {
-                    s.classList.add('bi-star-fill');
-                    s.classList.remove('bi-star');
-                }
-            });
-        });
-
-        star.addEventListener('mouseleave', function() {
-            const currentRating = parseInt(document.getElementById('ratingValue').value);
-            document.querySelectorAll('.rating-star').forEach((s, i) => {
-                if (i < currentRating) {
-                    s.classList.add('bi-star-fill', 'active');
-                    s.classList.remove('bi-star');
-                } else {
-                    s.classList.remove('bi-star-fill', 'active');
-                    s.classList.add('bi-star');
-                }
-            });
-        });
-    });
-
-    // Thêm vào giỏ hàng
-    function addToCart(bookId) {
-        const quantity = document.getElementById('qty').value;
-
-        $.ajax({
-            url: '@Url.Action("AddToCart", "Cart")',
-            type: 'POST',
-            data: { bookId: bookId, quantity: parseInt(quantity) },
-            success: function(data) {
-                if (data.success) {
-                    alert('Đã thêm vào giỏ hàng thành công!');
-                    if (data.cartCount) {
-                        $('.cart-count').text(data.cartCount);
-                    }
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
-                }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra. Vui lòng thử lại!');
-            }
-        });
-    }
-
-    // Mua ngay
-    function buyNow(bookId) {
-        const quantity = document.getElementById('qty').value;
-
-        $.ajax({
-            url: '@Url.Action("AddToCart", "Cart")',
-            type: 'POST',
-            data: { bookId: bookId, quantity: parseInt(quantity) },
-            success: function(data) {
-                if (data.success) {
-                    window.location.href = '@Url.Action("Index", "Cart")';
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
-                }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra. Vui lòng thử lại!');
-            }
-        });
-    }
-
-    // Thêm vào wishlist
-    function addToWishlist(bookId) {
-        $.ajax({
-            url: '@Url.Action("Add", "Wishlist")',
-            type: 'POST',
-            data: { bookId: bookId },
-            success: function(data) {
-                if (data.success) {
-                    alert('Đã thêm vào danh sách yêu thích!');
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
-                }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra. Vui lòng thử lại!');
-            }
-        });
-    }
-
-    // Gửi đánh giá
-    function submitReview() {
-        const rating = document.getElementById('ratingValue').value;
-        const comment = document.getElementById('comment').value.trim();
-        const bookId = document.getElementById('bookId').value;
-
-        // Validate
-        let isValid = true;
-
-        if (rating == 0) {
-            document.getElementById('ratingError').style.display = 'block';
-            isValid = false;
+        function qtyStep(n) {
+            var el = document.getElementById('qty');
+            var max = parseInt(el.getAttribute('max'));
+            var v = parseInt(el.value || '1', 10) + n;
+            if (v < 1) v = 1;
+            if (v > max) v = max;
+            el.value = v;
         }
 
-        if (!comment) {
-            document.getElementById('comment').classList.add('is-invalid');
-            isValid = false;
-        } else {
-            document.getElementById('comment').classList.remove('is-invalid');
+        // Thêm vào giỏ hàng
+        function addToCart(bookId) {
+            const quantity = document.getElementById('qty').value;
+            $.post('@Url.Action("AddToCart", "Cart")', { bookId, quantity }, data => {
+                alert(data.message || 'Đã thêm vào giỏ hàng!');
+            });
         }
 
-        if (!isValid) return;
+        // Mua ngay
+        function buyNow(bookId) {
+            const quantity = document.getElementById('qty').value;
+            $.post('@Url.Action("AddToCart", "Cart")', { bookId, quantity }, data => {
+                if (data.success) window.location.href = '@Url.Action("Index", "Cart")';
+            });
+        }
 
-        $.ajax({
-            url: '@Url.Action("AddReview", "Books")',
-            type: 'POST',
-            data: {
-                bookId: parseInt(bookId),
-                rating: parseInt(rating),
-                comment: comment
-            },
-            success: function(data) {
+        // Wishlist
+        function addToWishlist(bookId) {
+            $.post('@Url.Action("Add", "Wishlist")', { bookId }, data => {
+                alert(data.message || 'Đã thêm vào danh sách yêu thích!');
+            });
+        }
+
+        // Gửi đánh giá
+        function submitReview() {
+            const rating = parseInt($('#ratingValue').val());
+            const comment = $('#comment').val().trim();
+            const bookId = parseInt($('#bookId').val());
+
+            if (!rating || !comment) {
+                alert('Vui lòng chọn số sao và nhập nhận xét!');
+                return;
+            }
+
+            $.post('@Url.Action("AddReview", "Books")', { bookId, rating, comment }, data => {
                 if (data.success) {
                     alert('Cảm ơn bạn đã đánh giá!');
-                    $('#reviewModal').modal('hide');
                     location.reload();
                 } else {
-                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
+                    alert(data.message || 'Có lỗi xảy ra.');
                 }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra. Vui lòng thử lại!');
-            }
-        });
-    }
-
-    // Validate comment khi nhập
-    document.getElementById('comment').addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('is-invalid');
+            });
         }
-    });
     </script>
 }

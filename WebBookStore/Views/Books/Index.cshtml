@@ -1,7 +1,124 @@
-﻿
+﻿@model IEnumerable<WebBookStore.Models.Book>
+
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Danh sách sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Index</h2>
+<div class="container my-4">
+    <h2 class="mb-4 text-primary fw-semibold">Tất cả Sách</h2>
 
+    <!-- Thanh tìm kiếm và lọc -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <form class="d-flex" action="@Url.Action("Index", "Books")" method="get">
+            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control me-2" placeholder="Tìm theo tên, tác giả..." />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tìm kiếm</button>
+        </form>
+
+        <div>
+            <select name="sortBy" class="form-select" onchange="location.href='?sortBy=' + this.value;">
+                <option value="">Sắp xếp</option>
+                <option value="newest" @(ViewBag.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
+                <option value="price_asc" @(ViewBag.SortBy == "price_asc" ? "selected" : "")>Giá tăng dần</option>
+                <option value="price_desc" @(ViewBag.SortBy == "price_desc" ? "selected" : "")>Giá giảm dần</option>
+                <option value="name_asc" @(ViewBag.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</option>
+                <option value="name_desc" @(ViewBag.SortBy == "name_desc" ? "selected" : "")>Tên Z-A</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Danh sách sách -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var book in Model)
+            {
+                <div class="col-md-3 col-sm-6">
+                    <div class="card h-100 shadow-sm border-0">
+                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
+                            <img src="@book.ImageUrl" alt="@book.Title" class="card-img-top img-fluid" style="height: 280px; object-fit: cover;" />
+                            <div class="card-body">
+                                <h6 class="card-title fw-semibold text-truncate">@book.Title</h6>
+                                <p class="text-muted small mb-1">@book.Author</p>
+
+                                <div class="mb-1">
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round(book.AverageRating))
+                                        {
+                                            <i class="bi bi-star-fill text-warning small"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star text-warning small"></i>
+                                        }
+                                    }
+                                    <span class="text-muted small">(@book.ReviewCount)</span>
+                                </div>
+
+                                @if (book.DiscountPrice.HasValue && book.DiscountPrice.Value < book.Price)
+                                {
+                                    var discountPercent = Math.Round(100 - (book.DiscountPrice.Value / book.Price * 100), 0);
+                                    <p class="mb-0 fw-bold text-primary">@String.Format("{0:N0} ₫", book.DiscountPrice)</p>
+                                    <small class="text-muted text-decoration-line-through">@String.Format("{0:N0} ₫", book.Price)</small>
+                                    <span class="badge bg-danger ms-1">-@discountPercent%</span>
+                                }
+                                else
+                                {
+                                    <p class="fw-bold text-primary mb-0">@String.Format("{0:N0} ₫", book.Price)</p>
+                                }
+                            </div>
+                        </a>
+
+                        <div class="card-footer bg-white border-0 text-center pb-3">
+                            <button class="btn btn-outline-primary btn-sm" onclick="addToCart(@book.BookId)">
+                                <i class="bi bi-bag-plus me-1"></i>Thêm Giỏ Hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
+                <p>Không tìm thấy sách nào.</p>
+            </div>
+        }
+    </div>
+
+    <!-- Phân trang -->
+    @if (ViewBag.TotalPages != null && ViewBag.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = i, searchTerm = ViewBag.SearchTerm, sortBy = ViewBag.SortBy })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section scripts {
+    <script>
+        // Thêm sản phẩm vào giỏ hàng
+        function addToCart(bookId) {
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { bookId: bookId, quantity: 1 },
+                success: function (data) {
+                    alert(data.message || 'Đã thêm vào giỏ hàng!');
+                },
+                error: function () {
+                    alert('Có lỗi xảy ra, vui lòng thử lại.');
+                }
+            });
+        }
+    </script>
+}
