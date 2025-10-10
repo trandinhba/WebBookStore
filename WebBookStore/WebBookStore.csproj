@@ -244,6 +244,14 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="libman.json" />
+    <Content Include="wwwroot\images\tap1.png" />
+    <Content Include="wwwroot\images\tap2.png" />
+    <Content Include="wwwroot\images\tap3.png" />
+    <Content Include="wwwroot\images\tap4.png" />
+    <Content Include="wwwroot\images\tap5.png" />
+    <Content Include="wwwroot\images\tap6.png" />
+    <Content Include="wwwroot\images\tap7.png" />
+    <Content Include="wwwroot\images\tap8.png" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

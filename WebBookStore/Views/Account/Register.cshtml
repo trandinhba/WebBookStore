@@ -1,7 +1,6 @@
-﻿
-@{
-    ViewBag.Title = "Register";
+﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var title = "Register";
 }
 
 <div class="container py-5">
@@ -29,7 +28,7 @@
                             <label class="form-label">Confirm Password</label>
                             <input name="ConfirmPassword" class="form-control" type="password" required />
                         </div>
-                        <div class="text-muted small mb-2">By register, you agreed with Sach50 about services and terms of service and privacy policy</div>
+                        <div class="text-muted small mb-2">By registering, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of Sach50</div>
                         <button type="submit" class="btn btn-primary w-100">Register</button>
                     }
                 </div>
@@ -37,4 +36,3 @@
         </div>
     </div>
 </div>
-
