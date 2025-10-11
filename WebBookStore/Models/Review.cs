@@ -22,7 +22,8 @@ namespace WebBookStore.Models
 
         [StringLength(1000)]
         public string Comment { get; set; }
-
+        [Required]
+        public DateTime CreatedDate { get; set; }
         public DateTime ReviewDate { get; set; }
 
         [ForeignKey("BookId")]

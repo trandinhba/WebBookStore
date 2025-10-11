@@ -180,15 +180,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202510081619505_InitialCreate.cs" />
-    <Compile Include="Migrations\202510081619505_InitialCreate.Designer.cs">
-      <DependentUpon>202510081619505_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\Store\202510111243235_InitialStore.cs" />
+    <Compile Include="Migrations\Store\202510111243235_InitialStore.Designer.cs">
+      <DependentUpon>202510111243235_InitialStore.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202510090727127_Init.cs" />
-    <Compile Include="Migrations\202510090727127_Init.Designer.cs">
-      <DependentUpon>202510090727127_Init.cs</DependentUpon>
+    <Compile Include="Migrations\Store\202510111356550_AddCreatedDateToReview.cs" />
+    <Compile Include="Migrations\Store\202510111356550_AddCreatedDateToReview.Designer.cs">
+      <DependentUpon>202510111356550_AddCreatedDateToReview.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Migrations\Store\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Book.cs" />
     <Compile Include="Models\Cart.cs" />
@@ -234,6 +234,32 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\global.css" />
+    <Content Include="Content\images\.svg" />
+    <Content Include="Content\images\Bell-fill.svg" />
+    <Content Include="Content\images\Book-open-alt-fill.svg" />
+    <Content Include="Content\images\Credit-card-fill%402x.png" />
+    <Content Include="Content\images\Menu.svg" />
+    <Content Include="Content\images\Pen.svg" />
+    <Content Include="Content\images\sao-pro7-2%402x.png" />
+    <Content Include="Content\images\Subtract.svg" />
+    <Content Include="Content\images\Subtract2.svg" />
+    <Content Include="Content\images\tap1.png" />
+    <Content Include="Content\images\tap2.png" />
+    <Content Include="Content\images\tap3.png" />
+    <Content Include="Content\images\tap4.png" />
+    <Content Include="Content\images\tap5.png" />
+    <Content Include="Content\images\tap6.png" />
+    <Content Include="Content\images\tap7.png" />
+    <Content Include="Content\images\tap8.png" />
+    <Content Include="Content\images\User-fill.svg" />
+    <Content Include="Content\images\Vector-9.svg" />
+    <Content Include="Content\images\Vector-92.svg" />
+    <Content Include="Content\images\Vector.svg" />
+    <Content Include="Content\images\Vector2.svg" />
+    <Content Include="Content\images\Vector3.svg" />
+    <Content Include="Content\images\Vector4.svg" />
+    <Content Include="Content\index.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -244,14 +270,6 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="libman.json" />
-    <Content Include="wwwroot\images\tap1.png" />
-    <Content Include="wwwroot\images\tap2.png" />
-    <Content Include="wwwroot\images\tap3.png" />
-    <Content Include="wwwroot\images\tap4.png" />
-    <Content Include="wwwroot\images\tap5.png" />
-    <Content Include="wwwroot\images\tap6.png" />
-    <Content Include="wwwroot\images\tap7.png" />
-    <Content Include="wwwroot\images\tap8.png" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -330,11 +348,11 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202510081619505_InitialCreate.resx">
-      <DependentUpon>202510081619505_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\Store\202510111243235_InitialStore.resx">
+      <DependentUpon>202510111243235_InitialStore.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202510090727127_Init.resx">
-      <DependentUpon>202510090727127_Init.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\Store\202510111356550_AddCreatedDateToReview.resx">
+      <DependentUpon>202510111356550_AddCreatedDateToReview.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

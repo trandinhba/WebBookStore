@@ -7,7 +7,7 @@ namespace WebBookStore.Data
     {
         public StoreDbContext() : base("name=DefaultConnection")
         {
-            Database.SetInitializer(new DbInitializer());
+            
         }
 
         public DbSet<Category> Categories { get; set; }

@@ -1,7 +1,8 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Trang chủ";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var bestSellingBooks = ViewBag.BestSellingBooks as IEnumerable<WebBookStore.Models.Book>;
+    var newBooks = ViewBag.NewBooks as IEnumerable<WebBookStore.Models.Book>;
 }
 
 <div class="row g-3 mb-4">
@@ -9,63 +10,94 @@
         <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner rounded-2 shadow-sm" style="height: 320px;">
                 <div class="carousel-item active bg-light d-flex align-items-center justify-content-center">
-                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE</div>
+                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE 1</div>
                 </div>
                 <div class="carousel-item bg-light d-flex align-items-center justify-content-center">
-                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE</div>
+                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE 2</div>
                 </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span></button>
         </div>
     </div>
     <div class="col-lg-4 d-grid gap-3">
-        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE</div>
-        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE</div>
+        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE 3</div>
+        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE 4</div>
     </div>
-    <div class="col-12">
-        <div class="carousel-indicators position-static mt-2 d-flex justify-content-center gap-2">
-            <span class="indicator-dot active"></span>
-            <span class="indicator-dot"></span>
-            <span class="indicator-dot"></span>
-            <span class="indicator-dot"></span>
-        </div>
-    </div>
-    <hr class="mt-2"/>
 </div>
 
-<section class="mb-3">
+<hr class="mt-4" />
+
+<section class="mb-5">
     <div class="section-title">SẢN PHẨM BÁN CHẠY</div>
-    <div class="row g-4 pt-3">
-        @for (int i = 0; i < 8; i++)
+    <div class="row g-3 pt-3">
+        @if (bestSellingBooks != null && bestSellingBooks.Any())
         {
-            <div class="col-6 col-sm-4 col-md-3 col-lg-3">
-                <a class="card h-100 book-card text-decoration-none" href="#">
-                    <!-- Thay đường dẫn ảnh mẫu bằng đường dẫn ảnh PNG thực tế từ thư mục wwwroot/images -->
-                    <img class="card-img-top object-fit-cover" style="height: 220px;"
-                         src="@Url.Content("/wwwroot/images/tap" + (i+1) + ".png")" alt="Tập @(i+1)" />
-                    <div class="card-body p-2">
-                        <div class="book-title">Sword Art Online Progressive</div> <!-- Tên sách -->
-                        <div class="text-muted small">Tập @(i+1)</div> <!-- Tập sách -->
-                        <div class="fw-bold mt-1 text-dark">
-                            @String.Format("{0:N0} Đ", (i % 3 == 0 ? 120000 : (i % 3 == 1 ? 115000 : 100000))) <!-- Giá -->
+            foreach (var book in bestSellingBooks)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100 book-card shadow-sm">
+                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                            <img class="card-img-top" src="@Url.Content(book.ImageUrl)" alt="@book.Title">
+                        </a>
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h5 class="card-title book-title mb-1">
+                                <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
+                                    @book.Title
+                                </a>
+                            </h5>
+                            <div class="mt-auto">
+                                @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
+                                {
+                                    <span class="fw-bold text-danger me-2">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
+                                    <span class="text-muted text-decoration-line-through small">@String.Format("{0:N0} ₫", book.Price)</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold text-dark">@String.Format("{0:N0} ₫", book.Price)</span>
+                                }
+                            </div>
                         </div>
                     </div>
-                </a>
-            </div>
+                </div>
+            }
         }
     </div>
 </section>
 
-@section scripts {
-<script>
-    // dots styling sync with Bootstrap indicators could be added later
-</script>
-}
-
+<section class="mb-3">
+    <div class="section-title">SÁCH MỚI NHẤT</div>
+    <div class="row g-3 pt-3">
+        @if (newBooks != null && newBooks.Any())
+        {
+            foreach (var book in newBooks)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100 book-card shadow-sm">
+                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                            <img class="card-img-top" src="@Url.Content(book.ImageUrl)" alt="@book.Title">
+                        </a>
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h5 class="card-title book-title mb-1">
+                                <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
+                                    @book.Title
+                                </a>
+                            </h5>
+                            <div class="mt-auto">
+                                @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
+                                {
+                                    <span class="fw-bold text-danger me-2">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
+                                    <span class="text-muted text-decoration-line-through small">@String.Format("{0:N0} ₫", book.Price)</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold text-dark">@String.Format("{0:N0} ₫", book.Price)</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>

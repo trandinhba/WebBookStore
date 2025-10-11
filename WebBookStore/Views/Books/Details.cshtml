@@ -4,239 +4,197 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container my-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Books")">Sách</a></li>
-            <li class="breadcrumb-item active">@Model.Title</li>
-        </ol>
-    </nav>
+<div class="productdetailpage">
+    <section class="trang-chi-tit" style="max-width: 1200px; margin: auto; padding: 20px;">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Books")">Sách</a></li>
+                <li class="breadcrumb-item active">@Model.Title</li>
+            </ol>
+        </nav>
 
-    <!-- Thông tin sản phẩm -->
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="position-relative">
-                <img class="img-fluid rounded shadow-sm w-100" src="@Model.ImageUrl" alt="@Model.Title" />
-                @if (Model.StockQuantity <= 0)
-                {
-                    <div class="position-absolute top-0 start-0 badge bg-danger m-2">Hết hàng</div>
-                }
-                else if (Model.StockQuantity < 10)
-                {
-                    <div class="position-absolute top-0 start-0 badge bg-warning m-2">Còn @Model.StockQuantity</div>
-                }
-            </div>
-        </div>
-
-        <div class="col-md-8">
-            <h3 class="fw-semibold mb-3">@Model.Title</h3>
-
-            <div class="mb-2">
-                <span class="text-muted">Nhà Xuất Bản:</span>
-                <span class="text-primary">@Model.Publisher</span>
-            </div>
-            <div class="mb-2">
-                <span class="text-muted">Tác Giả:</span>
-                <span class="text-primary">@Model.Author</span>
-            </div>
-
-            <div class="mb-3">
-                @for (var i = 1; i <= 5; i++)
-                {
-                    if (i <= Math.Round(Model.AverageRating))
-                    {
-                        <i class="bi bi-star-fill text-warning"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-star text-warning"></i>
-                    }
-                }
-                <span class="text-muted ms-2">(@Model.ReviewCount đánh giá)</span>
-            </div>
-
-            @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price)
-            {
-                var discountPercent = Math.Round(100 - (Model.DiscountPrice.Value / Model.Price * 100), 0);
-                <div class="mb-2">
-                    <span class="text-decoration-line-through text-muted fs-5">@String.Format("{0:N0} ₫", Model.Price)</span>
-                    <span class="badge bg-danger ms-2">-@discountPercent%</span>
-                </div>
-                <div class="display-6 fw-bold text-primary mb-4">@String.Format("{0:N0} ₫", Model.DiscountPrice)</div>
-            }
-            else
-            {
-                <div class="display-6 fw-bold text-primary mb-4">@String.Format("{0:N0} ₫", Model.Price)</div>
-            }
-
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <span class="text-muted">Số lượng:</span>
-                <div class="input-group" style="width: 150px;">
-                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(-1)">
-                        <i class="bi bi-dash"></i>
-                    </button>
-                    <input id="qty" type="number" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" />
-                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(1)">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-                <span class="text-muted small">(@Model.StockQuantity sản phẩm có sẵn)</span>
-            </div>
-
-            <div class="d-flex gap-3 mb-3">
-                <button class="btn btn-primary px-4" onclick="buyNow(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
-                    <i class="bi bi-cart-check me-2"></i>Mua Ngay
-                </button>
-                <button class="btn btn-outline-primary px-4" onclick="addToCart(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
-                    <i class="bi bi-bag-plus me-2"></i>Thêm Giỏ Hàng
-                </button>
-                <button class="btn btn-outline-secondary" onclick="addToWishlist(@Model.BookId)">
-                    <i class="bi bi-heart"></i>
-                </button>
-            </div>
-
-            @if (Model.StockQuantity <= 0)
-            {
-                <div class="alert alert-danger" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Sản phẩm hiện tại đã hết hàng
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Thông tin chi tiết -->
-    <div class="mt-5">
-        <div class="section-title">THÔNG TIN CHI TIẾT</div>
-        <div class="bg-white border border-top-0 rounded-bottom p-4">
-            <div class="row">
-                <div class="col-md-6">
-                    <dl class="row mb-2">
-                        <dt class="col-sm-5 text-muted">Mã Sách:</dt>
-                        <dd class="col-sm-7">@Model.ISBN</dd>
-                        <dt class="col-sm-5 text-muted">Nhà Xuất Bản:</dt>
-                        <dd class="col-sm-7">@Model.Publisher</dd>
-                        <dt class="col-sm-5 text-muted">Tác Giả:</dt>
-                        <dd class="col-sm-7">@Model.Author</dd>
-                    </dl>
-                </div>
-                <div class="col-md-6">
-                    <dl class="row mb-2">
-                        <dt class="col-sm-5 text-muted">Năm Xuất Bản:</dt>
-                        <dd class="col-sm-7">@Model.PublishYear</dd>
-                        <dt class="col-sm-5 text-muted">Ngôn Ngữ:</dt>
-                        <dd class="col-sm-7">@Model.Language</dd>
-                        <dt class="col-sm-5 text-muted">Thể loại:</dt>
-                        <dd class="col-sm-7">@Model.Category?.Name</dd>
-                    </dl>
-                </div>
-            </div>
-
-            @if (!string.IsNullOrEmpty(Model.Description))
-            {
-                <hr class="my-4">
-                <h5 class="mb-3">Mô tả sản phẩm:</h5>
-                <div class="text-justify">@Html.Raw(Model.Description.Replace("\n", "<br>"))</div>
-            }
-        </div>
-    </div>
-
-    <!-- Đánh giá -->
-    <div class="mt-5">
-        <div class="section-title">ĐÁNH GIÁ</div>
-        <div class="bg-white border border-top-0 rounded-bottom p-4">
-            <div class="row mb-4">
-                <div class="col-md-4 text-center border-end">
-                    <div class="display-4 fw-bold text-primary">@String.Format("{0:0.0}", Model.AverageRating)<small class="text-muted fs-4">/5</small></div>
-                    <div class="my-2">
-                        @for (var i = 1; i <= 5; i++)
-                        {
-                            if (i <= Math.Round(Model.AverageRating))
+        <div class="trang-chi-tit-inner">
+            <div class="frame-parent23">
+                <section class="productdetailpage-frame-wrapper">
+                    <div class="sao-pro7-2-parent">
+                        <div class="position-relative">
+                            <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="@Url.Content(Model.ImageUrl)" />
+                            @if (Model.StockQuantity <= 0)
                             {
-                                <i class="bi bi-star-fill text-warning fs-5"></i>
+                                <div class="position-absolute top-0 start-0 badge bg-danger m-2 fs-6">Hết hàng</div>
+                            }
+                            else if (Model.StockQuantity < 10)
+                            {
+                                <div class="position-absolute top-0 start-0 badge bg-warning m-2 fs-6">Còn @Model.StockQuantity</div>
+                            }
+                        </div>
+
+                        <div class="sword-art-online-progressive-v-parent">
+                            <h2 class="productdetailpage-sword-art-online">@Model.Title</h2>
+                            <div class="nh-xut-bn-ipm-h-ni-wrapper">
+                                <h3 class="nh-xut-bn-container">
+                                    <span class="nh-xut-bn">Nhà Xuất Bản: </span>
+                                    <span class="ipm">@Model.Publisher</span>
+                                </h3>
+                            </div>
+                            <div class="frame-parent24">
+                                <div class="frame-wrapper4">
+                                    <div class="tc-gi-reki-kawahara-parent">
+                                        <h3 class="tc-gi-reki-container">
+                                            <span>Tác Giả: </span>
+                                            <span class="ipm">@Model.Author</span>
+                                        </h3>
+                                        <div class="frame-wrapper5">
+                                            <div class="productdetailpage-vector-parent">
+                                                @for (var i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= Math.Round(Model.AverageRating))
+                                                    {<i class="bi bi-star-fill text-warning fs-5"></i> }
+                                                    else
+                                                    { <i class="bi bi-star text-warning fs-5"></i>}
+                                                }
+                                                <h3 class="h3">(@Model.ReviewCount)</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price)
+                                {
+                                    var discountPercent = Math.Round(100 - (Model.DiscountPrice.Value / Model.Price * 100), 0);
+                                    <div class="mb-2">
+                                        <span class="text-decoration-line-through text-muted fs-5">@String.Format("{0:N0} ₫", Model.Price)</span>
+                                        <span class="badge bg-danger ms-2">-@discountPercent%</span>
+                                    </div>
+                                    <div class="display-6 fw-bold text-danger mb-4">@String.Format("{0:N0} ₫", Model.DiscountPrice)</div>
+                                }
+                                else
+                                {
+                                    <div class="display-6 fw-bold text-dark mb-4">@String.Format("{0:N0} ₫", Model.Price)</div>
+                                }
+                            </div>
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <span class="text-muted fw-bold">Số lượng:</span>
+                                <div class="input-group" style="width: 150px;">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(-1)">-</button>
+                                    <input id="qty" type="number" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(1)">+</button>
+                                </div>
+                                <span class="text-muted small">(@Model.StockQuantity sản phẩm có sẵn)</span>
+                            </div>
+                            <div class="frame-wrapper9">
+                                <div class="d-flex gap-2">
+                                    <button class="rectangle-parent3" style="width: 180px;" onclick="buyNow(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                                        <i class="bi bi-cart-check-fill text-white fs-5"></i>
+                                        <span class="mua-ngay">Mua Ngay</span>
+                                    </button>
+                                    <button class="rectangle-parent4" style="width: 220px;" onclick="addToCart(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                                        <i class="bi bi-cart-plus-fill fs-5" style="color: #2f70af;"></i>
+                                        <span class="thm-gi-hng">Thêm Giỏ Hàng</span>
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="addToWishlist(@Model.BookId)"><i class="bi bi-heart"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="frame-parent27 mt-5">
+                    <div class="rectangle-parent5"><h3 class="thng-tin-chi">THÔNG TIN CHI TIẾT</h3></div>
+                    <div class="p-4 border">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Mã Sách:</dt>
+                            <dd class="col-sm-9">@Model.ISBN</dd>
+                            <dt class="col-sm-3">Tác Giả:</dt>
+                            <dd class="col-sm-9">@Model.Author</dd>
+                            <dt class="col-sm-3">Nhà Xuất Bản:</dt>
+                            <dd class="col-sm-9">@Model.Publisher</dd>
+                            <dt class="col-sm-3">Năm Xuất Bản:</dt>
+                            <dd class="col-sm-9">@Model.PublishYear</dd>
+                            <dt class="col-sm-3">Ngôn Ngữ:</dt>
+                            <dd class="col-sm-9">@Model.Language</dd>
+                        </dl>
+                        <hr />
+                        <h5>Mô tả sản phẩm:</h5>
+                        <div class="d-thy-sword-container">@Html.Raw(Model.Description)</div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <div class="rectangle-parent5"><h3 class="thng-tin-chi">ĐÁNH GIÁ</h3></div>
+                    <div class="bg-white border border-top-0 rounded-bottom p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center border-end">
+                                <div class="display-4 fw-bold text-primary">@String.Format("{0:0.0}", Model.AverageRating)<small class="text-muted fs-4">/5</small></div>
+                                <div class="my-2">
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round(Model.AverageRating))
+                                        {<i class="bi bi-star-fill text-warning fs-5"></i> }
+                                        else
+                                        { <i class="bi bi-star text-warning fs-5"></i>}
+                                    }
+                                </div>
+                                <div class="text-muted">@Model.ReviewCount đánh giá</div>
+                            </div>
+                            <div class="col-md-5">
+                                @for (var star = 5; star >= 1; star--)
+                                {
+                                    var count = Model.Reviews?.Count(r => r.Rating == star) ?? 0;
+                                    var percentage = Model.ReviewCount > 0 ? (count * 100.0 / Model.ReviewCount) : 0;
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2" style="width: 30px;">@star <i class="bi bi-star-fill text-warning"></i></span>
+                                        <div class="progress flex-grow-1" style="height: 8px;"><div class="progress-bar bg-warning" style="width: @percentage%"></div></div>
+                                        <span class="ms-2 text-muted small" style="width: 40px;">(@count)</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-3 text-center align-self-center"><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal"><i class="bi bi-pencil-square me-2"></i>Viết Đánh Giá</button></div>
+                        </div>
+                        <hr>
+                        <div id="reviewsList">
+                            @if (Model.Reviews != null && Model.Reviews.Any())
+                            {
+                                foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedDate))
+                                {
+                                    <div class="review-item border-bottom pb-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong class="d-block">Khách hàng #@review.UserId</strong>
+                                                <div class="text-warning small">
+                                                    @for (var i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {<i class="bi bi-star-fill"></i> }
+                                                        else
+                                                        { <i class="bi bi-star"></i>}
+                                                    }
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </div>
+                                        <p class="mb-0">@review.Comment</p>
+                                    </div>
+                                }
                             }
                             else
                             {
-                                <i class="bi bi-star text-warning fs-5"></i>
+                                <div class="text-center text-muted py-4"><p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p></div>
                             }
-                        }
-                    </div>
-                    <div class="text-muted">@Model.ReviewCount đánh giá</div>
-                </div>
-                <div class="col-md-5">
-                    @for (var star = 5; star >= 1; star--)
-                    {
-                        var count = Model.Reviews != null ? Model.Reviews.Count(r => r.Rating == star) : 0;
-                        var percentage = Model.ReviewCount > 0 ? (count * 100.0 / Model.ReviewCount) : 0;
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="me-2" style="width: 30px;">@star <i class="bi bi-star-fill text-warning"></i></span>
-                            <div class="progress flex-grow-1" style="height: 8px;">
-                                <div class="progress-bar bg-warning" style="width: @percentage%"></div>
-                            </div>
-                            <span class="ms-2 text-muted small" style="width: 40px;">(@count)</span>
                         </div>
-                    }
-                </div>
-                <div class="col-md-3 text-center">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                        <i class="bi bi-pencil-square me-2"></i>Viết Đánh Giá
-                    </button>
-                </div>
-            </div>
-
-            <hr>
-
-            <!-- Danh sách đánh giá -->
-            <div id="reviewsList">
-                @if (Model.Reviews != null && Model.Reviews.Any())
-                {
-                    foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedDate))
-                    {
-                        <div class="review-item border-bottom pb-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <strong class="d-block">Khách hàng #@review.UserId</strong>
-                                    <div class="text-warning small">
-                                        @for (var i = 1; i <= 5; i++)
-                                        {
-                                            if (i <= review.Rating)
-                                            {
-                                                <i class="bi bi-star-fill"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="bi bi-star"></i>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-                                <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
-                            </div>
-                            <p class="mb-0">@review.Comment</p>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="text-center text-muted py-4">
-                        <i class="bi bi-chat-square-text fs-1 d-block mb-2"></i>
-                        <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
                     </div>
-                }
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
-<!-- Modal Viết Đánh Giá -->
 <div class="modal fade" id="reviewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Viết Đánh Giá</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+            <div class="modal-header"><h5 class="modal-title">Viết Đánh Giá</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <form id="reviewForm">
                     <input type="hidden" id="bookId" value="@Model.BookId">
@@ -249,109 +207,25 @@
                             }
                         </div>
                         <input type="hidden" id="ratingValue" value="0">
-                        <div class="invalid-feedback" id="ratingError">Vui lòng chọn số sao đánh giá</div>
                     </div>
                     <div class="mb-3">
                         <label for="comment" class="form-label">Nhận xét:</label>
-                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..." required></textarea>
-                        <div class="invalid-feedback">Vui lòng nhập nhận xét của bạn</div>
+                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ trải nghiệm..." required></textarea>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="submitReview()">
-                    <i class="bi bi-send me-2"></i>Gửi Đánh Giá
-                </button>
-            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" onclick="submitReview()">Gửi Đánh Giá</button></div>
         </div>
     </div>
 </div>
 
-<style>
-    .section-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 20px;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border-radius: 4px 4px 0 0;
-        letter-spacing: 0.5px;
-    }
-
-    .rating-star {
-        transition: all 0.2s ease;
-    }
-
-        .rating-star:hover,
-        .rating-star.active {
-            transform: scale(1.2);
-        }
-
-        .rating-star.active {
-            color: #ffc107 !important;
-        }
-
-    .review-item:last-child {
-        border-bottom: none !important;
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }
-</style>
-
 @section scripts {
     <script>
-        function qtyStep(n) {
-            var el = document.getElementById('qty');
-            var max = parseInt(el.getAttribute('max'));
-            var v = parseInt(el.value || '1', 10) + n;
-            if (v < 1) v = 1;
-            if (v > max) v = max;
-            el.value = v;
-        }
-
-        // Thêm vào giỏ hàng
-        function addToCart(bookId) {
-            const quantity = document.getElementById('qty').value;
-            $.post('@Url.Action("AddToCart", "Cart")', { bookId, quantity }, data => {
-                alert(data.message || 'Đã thêm vào giỏ hàng!');
-            });
-        }
-
-        // Mua ngay
-        function buyNow(bookId) {
-            const quantity = document.getElementById('qty').value;
-            $.post('@Url.Action("AddToCart", "Cart")', { bookId, quantity }, data => {
-                if (data.success) window.location.href = '@Url.Action("Index", "Cart")';
-            });
-        }
-
-        // Wishlist
-        function addToWishlist(bookId) {
-            $.post('@Url.Action("Add", "Wishlist")', { bookId }, data => {
-                alert(data.message || 'Đã thêm vào danh sách yêu thích!');
-            });
-        }
-
-        // Gửi đánh giá
-        function submitReview() {
-            const rating = parseInt($('#ratingValue').val());
-            const comment = $('#comment').val().trim();
-            const bookId = parseInt($('#bookId').val());
-
-            if (!rating || !comment) {
-                alert('Vui lòng chọn số sao và nhập nhận xét!');
-                return;
-            }
-
-            $.post('@Url.Action("AddReview", "Books")', { bookId, rating, comment }, data => {
-                if (data.success) {
-                    alert('Cảm ơn bạn đã đánh giá!');
-                    location.reload();
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra.');
-                }
-            });
-        }
+        function qtyStep(n){var el=document.getElementById('qty');var max=parseInt(el.getAttribute('max'));var v=parseInt(el.value||'1',10)+n;if(v<1)v=1;if(v>max)v=max;el.value=v}
+        function addToCart(bookId){const quantity=document.getElementById('qty').value;$.post('@Url.Action("AddToCart","Cart")', {bookId,quantity},data=>{alert(data.message||'Đã thêm vào giỏ hàng!')})}
+        function buyNow(bookId){const quantity=document.getElementById('qty').value;$.post('@Url.Action("AddToCart","Cart")', {bookId,quantity},data=>{if(data.success){window.location.href='@Url.Action("Index","Cart")'}else{alert(data.message||'Có lỗi xảy ra.')}})}
+        function addToWishlist(bookId){$.post('@Url.Action("Add","Wishlist")', {bookId},data=>{alert(data.message||'Đã thêm vào danh sách yêu thích!')})}
+        function submitReview(){const rating=parseInt($('#ratingValue').val());const comment=$('#comment').val().trim();const bookId=parseInt($('#bookId').val());if(!rating||rating==0){alert('Vui lòng chọn số sao đánh giá!');return}if(!comment){alert('Vui lòng nhập nhận xét!');return}$.post('@Url.Action("AddReview","Books")', {bookId,rating,comment},data=>{if(data.success){alert('Cảm ơn bạn đã đánh giá!');location.reload()}else{alert(data.message||'Có lỗi xảy ra.')}})}
+        document.addEventListener('DOMContentLoaded',function(){const stars=document.querySelectorAll('.rating-star');const ratingValueInput=document.getElementById('ratingValue');stars.forEach(star=>{star.addEventListener('mouseover',function(){resetStars();const rating=parseInt(this.getAttribute('data-rating'));for(let i=0;i<rating;i++){stars[i].classList.replace('bi-star','bi-star-fill')}});star.addEventListener('click',function(){const rating=this.getAttribute('data-rating');ratingValueInput.value=rating})});function resetStars(){stars.forEach(s=>{s.classList.replace('bi-star-fill','bi-star')})}});
     </script>
 }
