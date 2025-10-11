@@ -5,7 +5,7 @@ namespace WebBookStore.Data
 {
     public class StoreDbContext : DbContext
     {
-        public StoreDbContext() : base("name=DefaultConnection")
+        public StoreDbContext() : base("name=StoreDbContext")
         {
             
         }
