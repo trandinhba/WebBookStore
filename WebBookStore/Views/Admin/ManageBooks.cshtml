@@ -1,0 +1,567 @@
+@{
+    ViewBag.Title = "Quản Lý Sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@model List<WebBookStore.Models.Book>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <button class="btn btn-primary btn-add-book" data-bs-toggle="modal" data-bs-target="#addBookModal">
+            <i class="fas fa-plus"></i> Thêm Sách
+        </button>
+    </div>
+</div>
+
+<!-- Book List Section -->
+<div class="book-list-section">
+    <div class="section-header">
+        <h2 class="section-title">Danh Sách Sách</h2>
+        <div class="section-actions">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="sortDropdown">
+                    <i class="fas fa-sort"></i> Sort
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="title">Tên Sách A-Z</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="title-desc">Tên Sách Z-A</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="author">Tác Giả A-Z</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="price">Giá Thấp-Cao</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="price-desc">Giá Cao-Thấp</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="date">Mới Nhất</a></li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="filterDropdown">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="all">Tất Cả</a></li>
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="price-low">Giá < 100,000₫</a></li>
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="price-medium">100,000₫ - 200,000₫</a></li>
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="price-high">Giá > 200,000₫</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Table -->
+    <div class="table-container">
+        <table class="table table-hover books-table">
+            <thead>
+                <tr>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th>Nhà Xuất Bản</th>
+                    <th>Tác Giả</th>
+                    <th>Giá</th>
+                    <th>Mô tả</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var book in Model)
+                    {
+                        <tr data-book-id="@book.BookId">
+                            <td class="book-id">@book.BookId</td>
+                            <td class="book-title">@book.Title</td>
+                            <td class="book-publisher">@book.Publisher</td>
+                            <td class="book-author">@book.Author</td>
+                            <td class="book-price">@book.Price.ToString("N0") ₫</td>
+                            <td class="book-description">
+                                @if (!string.IsNullOrEmpty(book.Description))
+                                {
+                                    @(book.Description.Length > 50 ? book.Description.Substring(0, 50) + "..." : book.Description)
+                                }
+                            </td>
+                            <td class="book-actions">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <button class="dropdown-item edit-book-btn" data-book-id="@book.BookId">
+                                                <i class="fas fa-edit me-2"></i>Sửa
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item delete-book-btn" data-book-id="@book.BookId">
+                                                <i class="fas fa-trash me-2"></i>Xóa
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-book fa-2x mb-3"></i>
+                            <p>Chưa có sách nào</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            <span>Dòng mỗi trang</span>
+            <select class="form-select form-select-sm" id="rowsPerPage">
+                <option value="8" selected>8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-controls">
+            <span class="pagination-text" id="paginationText">1 of 1</span>
+            <button class="btn btn-sm btn-outline-secondary" id="prevPage" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" id="nextPage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookModalLabel">Thêm Sách Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBookForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên Sách *</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tác Giả *</label>
+                                <input type="text" class="form-control" name="author" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nhà Xuất Bản *</label>
+                                <input type="text" class="form-control" name="publisher" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Giá *</label>
+                                <input type="number" class="form-control" name="price" min="0" step="1000" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ISBN</label>
+                        <input type="text" class="form-control" name="isbn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveAddBook">Thêm Sách</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBookModalLabel">Sửa Thông Tin Sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editBookForm">
+                    <input type="hidden" name="bookId" id="editBookId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên Sách *</label>
+                                <input type="text" class="form-control" name="title" id="editTitle" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tác Giả *</label>
+                                <input type="text" class="form-control" name="author" id="editAuthor" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nhà Xuất Bản *</label>
+                                <input type="text" class="form-control" name="publisher" id="editPublisher" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Giá *</label>
+                                <input type="number" class="form-control" name="price" id="editPrice" min="0" step="1000" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ISBN</label>
+                        <input type="text" class="form-control" name="isbn" id="editIsbn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control" name="description" id="editDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditBook">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title d-flex align-items-center" id="deleteConfirmModalLabel">
+                    <i class="fas fa-trash-alt text-danger me-2"></i>
+                    Bạn có chắc muốn xóa?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="mb-0">Hành động này không thể hoàn tác. Sách sẽ bị xóa vĩnh viễn khỏi hệ thống.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('Book management script loaded');
+            
+            // Store original books data
+            var originalBooks = [];
+            var currentSort = 'date';
+            var currentFilter = 'all';
+            var currentPage = 1;
+            var rowsPerPage = parseInt($('#rowsPerPage').val()) || 8; // Get from dropdown
+
+            // Initialize books data
+            $('.books-table tbody tr').each(function() {
+                var bookId = $(this).find('.book-id').text();
+                if (bookId && bookId.trim() !== '') {
+                    originalBooks.push({
+                        element: $(this),
+                        id: parseInt(bookId),
+                        title: $(this).find('.book-title').text().trim(),
+                        author: $(this).find('.book-author').text().trim(),
+                        publisher: $(this).find('.book-publisher').text().trim(),
+                        price: parseFloat($(this).find('.book-price').text().replace(/[^\d]/g, '')),
+                        description: $(this).find('.book-description').text().trim()
+                    });
+                }
+            });
+            
+            console.log('Found books:', originalBooks.length);
+
+            // Sort functionality
+            $('.sort-option').click(function(e) {
+                e.preventDefault();
+                var sortType = $(this).data('sort');
+                console.log('Sort clicked:', sortType);
+                currentSort = sortType;
+                
+                // Update dropdown text
+                $('#sortDropdown').html('<i class="fas fa-sort"></i> ' + $(this).text());
+                
+                // Apply sorting
+                applySortAndFilter();
+            });
+
+            // Filter functionality
+            $('.filter-option').click(function(e) {
+                e.preventDefault();
+                var filterType = $(this).data('filter');
+                currentFilter = filterType;
+                
+                // Update dropdown text
+                $('#filterDropdown').html('<i class="fas fa-filter"></i> ' + $(this).text());
+                
+                // Apply filtering
+                applySortAndFilter();
+            });
+
+            // Rows per page functionality
+            $('#rowsPerPage').change(function() {
+                rowsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to first page
+                console.log('Changed rows per page to:', rowsPerPage);
+                applySortAndFilter();
+            });
+
+            // Pagination navigation
+            $('#prevPage').click(function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    applySortAndFilter();
+                }
+            });
+
+            $('#nextPage').click(function() {
+                var totalBooks = getFilteredBooks().length;
+                var totalPages = Math.ceil(totalBooks / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applySortAndFilter();
+                }
+            });
+
+            // Helper function to get filtered books
+            function getFilteredBooks() {
+                return originalBooks.filter(function(book) {
+                    switch(currentFilter) {
+                        case 'price-low':
+                            return book.price < 100000;
+                        case 'price-medium':
+                            return book.price >= 100000 && book.price <= 200000;
+                        case 'price-high':
+                            return book.price > 200000;
+                        default:
+                            return true;
+                    }
+                });
+            }
+
+            function applySortAndFilter() {
+                console.log('Applying sort:', currentSort, 'filter:', currentFilter, 'page:', currentPage);
+                
+                var filteredBooks = getFilteredBooks();
+                
+                console.log('Filtered books:', filteredBooks.length);
+
+                // Sort filtered books
+                filteredBooks.sort(function(a, b) {
+                    var result;
+                    switch(currentSort) {
+                        case 'title':
+                            result = a.title.localeCompare(b.title);
+                            break;
+                        case 'title-desc':
+                            result = b.title.localeCompare(a.title);
+                            break;
+                        case 'author':
+                            result = a.author.localeCompare(b.author);
+                            break;
+                        case 'price':
+                            result = a.price - b.price;
+                            break;
+                        case 'price-desc':
+                            result = b.price - a.price;
+                            break;
+                        case 'date':
+                        default:
+                            result = b.id - a.id; // Assuming higher ID = newer
+                            break;
+                    }
+                    return result;
+                });
+                
+                console.log('Sorted books:', filteredBooks.map(function(b) { return b.title; }));
+
+                // Calculate pagination
+                var totalBooks = filteredBooks.length;
+                var totalPages = Math.ceil(totalBooks / rowsPerPage);
+                var startIndex = (currentPage - 1) * rowsPerPage;
+                var endIndex = Math.min(startIndex + rowsPerPage, totalBooks);
+                
+                // Ensure currentPage doesn't exceed totalPages
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                    startIndex = (currentPage - 1) * rowsPerPage;
+                    endIndex = Math.min(startIndex + rowsPerPage, totalBooks);
+                }
+                
+                // Get books for current page
+                var booksToShow = filteredBooks.slice(startIndex, endIndex);
+                
+                console.log('Pagination calc: totalBooks=', totalBooks, 'rowsPerPage=', rowsPerPage, 'totalPages=', totalPages);
+                console.log('Page', currentPage, 'of', totalPages, 'showing', booksToShow.length, 'books (', startIndex+1, '-', endIndex, ')');
+
+                // Clear tbody and rebuild with paginated rows
+                var tbody = $('.books-table tbody');
+                tbody.empty();
+                
+                // Append paginated rows
+                booksToShow.forEach(function(book) {
+                    tbody.append(book.element);
+                });
+                
+                console.log('Rebuilt table with', booksToShow.length, 'books');
+
+                // Update pagination text - Format: "X of Y" (current page of total pages)
+                if (totalBooks === 0) {
+                    $('#paginationText').text('0 of 0');
+                } else {
+                    $('#paginationText').text(currentPage + ' of ' + totalPages);
+                }
+                
+                // Update navigation buttons
+                $('#prevPage').prop('disabled', currentPage <= 1);
+                $('#nextPage').prop('disabled', currentPage >= totalPages);
+                
+                console.log('Updated pagination: page', currentPage, 'of', totalPages, 'text:', currentPage + ' of ' + totalPages);
+            }
+
+            // Initial load - Apply pagination on page load
+            console.log('Initial load - applying sort and filter');
+            console.log('Initial values - rowsPerPage:', rowsPerPage, 'totalBooks:', originalBooks.length);
+            applySortAndFilter();
+
+            // Add Book
+            $('#saveAddBook').click(function() {
+                var formData = {
+                    title: $('input[name="title"]').val(),
+                    author: $('input[name="author"]').val(),
+                    publisher: $('input[name="publisher"]').val(),
+                    price: parseFloat($('input[name="price"]').val()),
+                    description: $('textarea[name="description"]').val(),
+                    isbn: $('input[name="isbn"]').val()
+                };
+
+                $.post('@Url.Action("AddBook", "Admin")', formData)
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function() {
+                        alert('Có lỗi xảy ra khi thêm sách');
+                    });
+            });
+
+            // Edit Book
+            $('.edit-book-btn').click(function() {
+                var bookId = $(this).data('book-id');
+                var row = $('tr[data-book-id="' + bookId + '"]');
+                
+                $('#editBookId').val(bookId);
+                $('#editTitle').val(row.find('.book-title').text());
+                $('#editAuthor').val(row.find('.book-author').text());
+                $('#editPublisher').val(row.find('.book-publisher').text());
+                $('#editPrice').val(row.find('.book-price').text().replace(/[^\d]/g, ''));
+                $('#editIsbn').val(row.find('.book-id').text());
+                $('#editDescription').val(row.find('.book-description').text());
+                
+                $('#editBookModal').modal('show');
+            });
+
+            $('#saveEditBook').click(function() {
+                var formData = {
+                    bookId: parseInt($('#editBookId').val()),
+                    title: $('#editTitle').val(),
+                    author: $('#editAuthor').val(),
+                    publisher: $('#editPublisher').val(),
+                    price: parseFloat($('#editPrice').val()),
+                    description: $('#editDescription').val(),
+                    isbn: $('#editIsbn').val()
+                };
+
+                $.post('@Url.Action("EditBook", "Admin")', formData)
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function() {
+                        alert('Có lỗi xảy ra khi cập nhật sách');
+                    });
+            });
+
+            // Delete Book - Use event delegation for dynamically added elements
+            $(document).on('click', '.delete-book-btn', function(e) {
+                e.preventDefault();
+                var bookId = $(this).data('book-id');
+                var bookTitle = $('tr[data-book-id="' + bookId + '"]').find('.book-title').text();
+                
+                console.log('Delete button clicked for book ID:', bookId, 'Title:', bookTitle);
+                
+                // Show confirmation dialog
+                $('#deleteConfirmModal').modal('show');
+                
+                // Store book info for deletion
+                $('#deleteConfirmModal').data('book-id', bookId);
+                $('#deleteConfirmModal').data('book-title', bookTitle);
+            });
+            
+            // Confirm delete action
+            $('#confirmDeleteBtn').click(function() {
+                var bookId = $('#deleteConfirmModal').data('book-id');
+                var bookTitle = $('#deleteConfirmModal').data('book-title');
+                
+                console.log('Confirming delete for book ID:', bookId);
+                
+                $.post('@Url.Action("DeleteBook", "Admin")', { bookId: bookId })
+                    .done(function(response) {
+                        console.log('Delete response:', response);
+                        if (response.success) {
+                            $('#deleteConfirmModal').modal('hide');
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.log('Delete error:', error);
+                        alert('Có lỗi xảy ra khi xóa sách: ' + error);
+                    });
+            });
+        });
+    </script>
+}

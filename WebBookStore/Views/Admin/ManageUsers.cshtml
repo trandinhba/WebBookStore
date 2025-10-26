@@ -1,218 +1,610 @@
-@model IEnumerable<WebBookStore.Models.User>
-
+@model List<WebBookStore.Models.User>
 @{
-    ViewBag.Title = "Quản Lý Người Dùng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-users me-2"></i>
-                    Quản Lý Người Dùng
-                </h1>
-                <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Quay Lại Dashboard
-                </a>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <button class="btn btn-success btn-add-employee" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+            <i class="fas fa-plus"></i> @(ViewBag.Title != null && ViewBag.Title.Contains("Khách Hàng") ? "Thêm Khách Hàng" : "Thêm Nhân Viên")
+        </button>
+    </div>
+</div>
+
+<!-- Employee List Section -->
+<div class="employee-list-section">
+    <div class="section-header">
+        <h2 class="section-title">Danh Sách @(ViewBag.Title != null && ViewBag.Title.Contains("Khách Hàng") ? "Khách Hàng" : "Nhân Viên")</h2>
+        <div class="section-actions">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="sortDropdown">
+                    <i class="fas fa-sort"></i> Sort
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="username">Username A-Z</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="username-desc">Username Z-A</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="fullname">Họ Tên A-Z</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="role">Vai Trò</a></li>
+                    <li><a class="dropdown-item sort-option" href="#" data-sort="date">Mới Nhất</a></li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="filterDropdown">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="all">Tất Cả</a></li>
+                    @if (ViewBag.Title != null && ViewBag.Title.Contains("Khách Hàng"))
+                    {
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="customer">Khách Hàng</a></li>
+                    }
+                    else
+                    {
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="admin">Admin</a></li>
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="employee">Nhân Viên</a></li>
+                    }
+                </ul>
             </div>
         </div>
     </div>
 
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @ViewBag.Error
-        </div>
-    }
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-list me-2"></i>
-                Danh Sách Người Dùng
-            </h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Họ Tên</th>
-                            <th>Role</th>
-                            <th>Trạng Thái</th>
-                            <th>Ngày Tạo</th>
-                            <th>Thao Tác</th>
+    <!-- Table Container -->
+    <div class="table-container">
+        <table class="table books-table">
+            <thead>
+                <tr>
+                    <th>Mã User</th>
+                    <th>@(ViewBag.Title != null && ViewBag.Title.Contains("Khách Hàng") ? "Mã Khách Hàng" : "Mã Nhân Viên")</th>
+                    <th>Họ Tên</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Địa Chỉ</th>
+                    <th>SDT</th>
+                    <th>Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var user in Model)
+                    {
+                        <tr data-user-id="@user.UserId">
+                            <td class="user-id">@user.UserId</td>
+                            <td class="employee-id">@(ViewBag.Title != null && ViewBag.Title.Contains("Khách Hàng") ? "CUST" + user.UserId.ToString("D6") : "EMP" + user.UserId.ToString("D6"))</td>
+                            <td class="fullname">@(user.FullName ?? "")</td>
+                            <td class="username">@(user.Username ?? "")</td>
+                            <td class="password">@(user.PasswordHash ?? "")</td>
+                            <td class="address">@(user.Address ?? "")</td>
+                            <td class="phone">@(user.PhoneNumber ?? "")</td>
+                            <td class="user-actions">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item edit-employee-btn" href="#" data-user-id="@user.UserId">
+                                            <i class="fas fa-edit me-2"></i>Sửa
+                                        </a></li>
+                                        <li><a class="dropdown-item delete-employee-btn" href="#" data-user-id="@user.UserId">
+                                            <i class="fas fa-trash me-2"></i>Xóa
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model)
-                        {
-                            <tr>
-                                <td>@user.UserId</td>
-                                <td>@user.Username</td>
-                                <td>@user.Email</td>
-                                <td>@user.FullName</td>
-                                <td>
-                                    @if (user.Role == "Admin")
-                                    {
-                                        <span class="badge bg-danger">Admin</span>
-                                    }
-                                    else if (user.Role == "Customer")
-                                    {
-                                        <span class="badge bg-success">Customer</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Guest</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (user.IsActive)
-                                    {
-                                        <span class="badge bg-success">Hoạt động</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Vô hiệu hóa</span>
-                                    }
-                                </td>
-                                <td>@user.CreatedDate.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="@Url.Action("UserDetails", "Admin", new { id = user.UserId })" 
-                                           class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        
-                                        @if (user.Role != "Admin")
-                                        {
-                                            if (user.IsActive)
-                                            {
-                                                <button type="button" class="btn btn-warning btn-sm" 
-                                                        onclick="deactivateUser(@user.UserId)">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <button type="button" class="btn btn-success btn-sm" 
-                                                        onclick="activateUser(@user.UserId)">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            }
-                                            
-                                            <button type="button" class="btn btn-primary btn-sm" 
-                                                    onclick="changeRole(@user.UserId, '@user.Role')">
-                                                <i class="fas fa-user-edit"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Không có nhân viên nào</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            <span>Dòng mỗi trang</span>
+            <select class="form-select form-select-sm" id="rowsPerPage">
+                <option value="8" selected>8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-controls">
+            <span class="pagination-text" id="paginationText">1 of 1</span>
+            <button class="btn btn-sm btn-outline-secondary" id="prevPage" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" id="nextPage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Modal Change Role -->
-<div class="modal fade" id="changeRoleModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thay Đổi Role</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="addEmployeeModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Thêm Nhân Viên Mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="changeRoleForm">
-                    <input type="hidden" id="userId" name="userId" />
-                    <div class="mb-3">
-                        <label class="form-label">Role hiện tại:</label>
-                        <input type="text" id="currentRole" class="form-control" readonly />
+                <form id="addEmployeeForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username *</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Password *</label>
+                                <input type="password" class="form-control" name="password" required>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Role mới:</label>
-                        <select id="newRole" name="newRole" class="form-select">
-                            <option value="Customer">Customer</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Họ Tên *</label>
+                                <input type="text" class="form-control" name="fullName" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Vai Trò *</label>
+                                <select class="form-control" name="role" required>
+                                    <option value="">Chọn vai trò</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Employee">Nhân Viên</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Địa Chỉ</label>
+                                <input type="text" class="form-control" name="address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số Điện Thoại</label>
+                                <input type="text" class="form-control" name="phoneNumber">
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="confirmChangeRole()">Xác Nhận</button>
+                <button type="button" class="btn btn-success" id="saveAddEmployee">Thêm Nhân Viên</button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function deactivateUser(userId) {
-        if (confirm('Bạn có chắc chắn muốn vô hiệu hóa người dùng này?')) {
-            $.post('@Url.Action("DeactivateUser", "Admin")', { userId: userId })
-                .done(function(response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('Lỗi: ' + response.message);
+<!-- Edit Employee Modal -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editEmployeeModalLabel">
+                    <i class="fas fa-user-edit me-2"></i>Chỉnh Sửa Nhân Viên
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editEmployeeForm">
+                    <input type="hidden" id="editUserId" name="userId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="editUsername" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Password (để trống nếu không đổi)</label>
+                                <input type="password" class="form-control" id="editPassword" name="password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="editEmail" name="email" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Họ Tên *</label>
+                                <input type="text" class="form-control" id="editFullName" name="fullName" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Vai Trò *</label>
+                                <select class="form-control" id="editRole" name="role" required>
+                                    <option value="">Chọn vai trò</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Employee">Nhân Viên</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Địa Chỉ</label>
+                                <input type="text" class="form-control" id="editAddress" name="address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số Điện Thoại</label>
+                                <input type="text" class="form-control" id="editPhoneNumber" name="phoneNumber">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditEmployee">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title d-flex align-items-center" id="deleteConfirmModalLabel">
+                    <i class="fas fa-trash-alt text-danger me-2"></i>
+                    Bạn có chắc muốn xóa?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="mb-0">Hành động này không thể hoàn tác. Nhân viên sẽ bị xóa vĩnh viễn khỏi hệ thống.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('Employee management script loaded');
+            
+            // Store original users data
+            var originalUsers = [];
+            var currentSort = 'date';
+            var currentFilter = 'all';
+            var currentPage = 1;
+            var rowsPerPage = parseInt($('#rowsPerPage').val()) || 8; // Get from dropdown
+
+            // Initialize users data
+            $('.books-table tbody tr').each(function() {
+                var userId = $(this).find('.user-id').text();
+                if (userId && userId.trim() !== '') {
+                    originalUsers.push({
+                        element: $(this),
+                        id: parseInt(userId),
+                        username: $(this).find('.username').text().trim(),
+                        fullname: $(this).find('.fullname').text().trim(),
+                        role: $(this).find('.role').text().trim() || 'Employee',
+                        address: $(this).find('.address').text().trim(),
+                        phone: $(this).find('.phone').text().trim()
+                    });
+                }
+            });
+            
+            console.log('Found users:', originalUsers.length);
+
+            // Sort functionality
+            $('.sort-option').click(function(e) {
+                e.preventDefault();
+                var sortType = $(this).data('sort');
+                console.log('Sort clicked:', sortType);
+                currentSort = sortType;
+                currentPage = 1; // Reset to first page on sort
+                $('#sortDropdown').html('<i class="fas fa-sort"></i> ' + $(this).text());
+                applySortAndFilter();
+            });
+
+            // Filter functionality
+            $('.filter-option').click(function(e) {
+                e.preventDefault();
+                var filterType = $(this).data('filter');
+                currentFilter = filterType;
+                currentPage = 1; // Reset to first page on filter
+                $('#filterDropdown').html('<i class="fas fa-filter"></i> ' + $(this).text());
+                applySortAndFilter();
+            });
+
+            // Rows per page functionality
+            $('#rowsPerPage').change(function() {
+                rowsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to first page
+                console.log('Changed rows per page to:', rowsPerPage);
+                applySortAndFilter();
+            });
+
+            // Pagination navigation
+            $('#prevPage').click(function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    applySortAndFilter();
+                }
+            });
+
+            $('#nextPage').click(function() {
+                var totalUsers = getFilteredUsers().length;
+                var totalPages = Math.ceil(totalUsers / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applySortAndFilter();
+                }
+            });
+
+            // Helper function to get filtered users
+            function getFilteredUsers() {
+                return originalUsers.filter(function(user) {
+                    switch(currentFilter) {
+                        case 'admin':
+                            return user.role === 'Admin';
+                        case 'employee':
+                            return user.role === 'Employee';
+                        case 'customer':
+                            return user.role === 'Customer';
+                        default:
+                            return true;
                     }
-                })
-                .fail(function() {
-                    alert('Có lỗi xảy ra khi gửi yêu cầu');
                 });
-        }
-    }
-
-    function activateUser(userId) {
-        if (confirm('Bạn có chắc chắn muốn kích hoạt người dùng này?')) {
-            $.post('@Url.Action("ActivateUser", "Admin")', { userId: userId })
-                .done(function(response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('Lỗi: ' + response.message);
-                    }
-                })
-                .fail(function() {
-                    alert('Có lỗi xảy ra khi gửi yêu cầu');
-                });
-        }
-    }
-
-    function changeRole(userId, currentRole) {
-        $('#userId').val(userId);
-        $('#currentRole').val(currentRole);
-        $('#changeRoleModal').modal('show');
-    }
-
-    function confirmChangeRole() {
-        var userId = $('#userId').val();
-        var newRole = $('#newRole').val();
-        
-        $.post('@Url.Action("ChangeUserRole", "Admin")', { 
-            userId: userId, 
-            newRole: newRole 
-        })
-        .done(function(response) {
-            if (response.success) {
-                $('#changeRoleModal').modal('hide');
-                location.reload();
-            } else {
-                alert('Lỗi: ' + response.message);
             }
-        })
-        .fail(function() {
-            alert('Có lỗi xảy ra khi gửi yêu cầu');
-        });
-    }
-</script>
 
+            function applySortAndFilter() {
+                console.log('Applying sort:', currentSort, 'filter:', currentFilter, 'page:', currentPage);
+                
+                var filteredUsers = getFilteredUsers();
+                
+                console.log('Filtered users:', filteredUsers.length);
+
+                // Sort filtered users
+                filteredUsers.sort(function(a, b) {
+                    var result;
+                    switch(currentSort) {
+                        case 'username':
+                            result = a.username.localeCompare(b.username);
+                            break;
+                        case 'username-desc':
+                            result = b.username.localeCompare(a.username);
+                            break;
+                        case 'fullname':
+                            result = a.fullname.localeCompare(b.fullname);
+                            break;
+                        case 'role':
+                            result = a.role.localeCompare(b.role);
+                            break;
+                        case 'date':
+                        default:
+                            result = b.id - a.id; // Assuming higher ID = newer
+                            break;
+                    }
+                    return result;
+                });
+                
+                console.log('Sorted users:', filteredUsers.map(function(u) { return u.username; }));
+
+                // Calculate pagination
+                var totalUsers = filteredUsers.length;
+                var totalPages = Math.ceil(totalUsers / rowsPerPage);
+                var startIndex = (currentPage - 1) * rowsPerPage;
+                var endIndex = Math.min(startIndex + rowsPerPage, totalUsers);
+                
+                // Ensure currentPage doesn't exceed totalPages
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                    startIndex = (currentPage - 1) * rowsPerPage;
+                    endIndex = Math.min(startIndex + rowsPerPage, totalUsers);
+                }
+                
+                // Get users for current page
+                var usersToShow = filteredUsers.slice(startIndex, endIndex);
+                
+                console.log('Pagination calc: totalUsers=', totalUsers, 'rowsPerPage=', rowsPerPage, 'totalPages=', totalPages);
+                console.log('Page', currentPage, 'of', totalPages, 'showing', usersToShow.length, 'users (', startIndex+1, '-', endIndex, ')');
+
+                // Clear tbody and rebuild with paginated rows
+                var tbody = $('.books-table tbody');
+                tbody.empty();
+                
+                // Append paginated rows
+                usersToShow.forEach(function(user) {
+                    tbody.append(user.element);
+                });
+                
+                console.log('Rebuilt table with', usersToShow.length, 'users');
+
+                // Update pagination text - Format: "X of Y" (current page of total pages)
+                if (totalUsers === 0) {
+                    $('#paginationText').text('0 of 0');
+                } else {
+                    $('#paginationText').text(currentPage + ' of ' + totalPages);
+                }
+                
+                // Update navigation buttons
+                $('#prevPage').prop('disabled', currentPage <= 1);
+                $('#nextPage').prop('disabled', currentPage >= totalPages);
+                
+                console.log('Updated pagination: page', currentPage, 'of', totalPages, 'text:', currentPage + ' of ' + totalPages);
+            }
+
+            // Initial load - Apply pagination on page load
+            console.log('Initial load - applying sort and filter');
+            console.log('Initial values - rowsPerPage:', rowsPerPage, 'totalUsers:', originalUsers.length);
+            applySortAndFilter();
+
+            // Test function
+            window.testAction = function() {
+                console.log('Testing action...');
+                $.post('/Admin/TestAction')
+                    .done(function(response) {
+                        console.log('Test response:', response);
+                        alert('Test thành công: ' + response.message);
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.log('Test error:', xhr.responseText);
+                        alert('Test lỗi: ' + error + '\nChi tiết: ' + xhr.responseText);
+                    });
+            };
+
+            // Add Employee
+            $('#saveAddEmployee').click(function() {
+                var formData = {
+                    username: $('input[name="username"]').val(),
+                    password: $('input[name="password"]').val(),
+                    email: $('input[name="email"]').val(),
+                    fullName: $('input[name="fullName"]').val(),
+                    address: $('input[name="address"]').val(),
+                    phoneNumber: $('input[name="phoneNumber"]').val(),
+                    role: $('select[name="role"]').val()
+                };
+
+                $.post('/Admin/AddEmployee', formData)
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $('#addEmployeeModal').modal('hide');
+                            location.reload(); // Reload to show new employee
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.log('AddEmployee AJAX error:', xhr.responseText);
+                        alert('Lỗi AJAX: ' + error + '\nChi tiết: ' + xhr.responseText);
+                    });
+            });
+
+            // Edit Employee
+            $(document).on('click', '.edit-employee-btn', function() {
+                var userId = $(this).data('user-id');
+                var row = $('tr[data-user-id="' + userId + '"]');
+                
+                $('#editUserId').val(userId);
+                $('#editUsername').val(row.find('.username').text());
+                $('#editFullName').val(row.find('.fullname').text());
+                $('#editAddress').val(row.find('.address').text());
+                $('#editPhoneNumber').val(row.find('.phone').text());
+                $('#editRole').val(row.find('.role').text() || 'Employee');
+
+                $('#editEmployeeModal').modal('show');
+            });
+
+            $('#saveEditEmployee').click(function() {
+                var formData = {
+                    userId: $('#editUserId').val(),
+                    username: $('#editUsername').val(),
+                    password: $('#editPassword').val(),
+                    email: $('#editEmail').val(),
+                    fullName: $('#editFullName').val(),
+                    address: $('#editAddress').val(),
+                    phoneNumber: $('#editPhoneNumber').val(),
+                    role: $('#editRole').val()
+                };
+
+                $.post('/Admin/EditEmployee', formData)
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $('#editEmployeeModal').modal('hide');
+                            location.reload(); // Reload to show updated employee
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.log('EditEmployee AJAX error:', xhr.responseText);
+                        alert('Lỗi AJAX: ' + error + '\nChi tiết: ' + xhr.responseText);
+                    });
+            });
+
+            // Delete Employee - Use event delegation for dynamically added elements
+            $(document).on('click', '.delete-employee-btn', function(e) {
+                e.preventDefault();
+                var userId = $(this).data('user-id');
+                var username = $('tr[data-user-id="' + userId + '"]').find('.username').text();
+                
+                console.log('Delete button clicked for user ID:', userId, 'Username:', username);
+                
+                // Show confirmation dialog
+                $('#deleteConfirmModal').modal('show');
+                
+                // Store user info for deletion
+                $('#deleteConfirmModal').data('user-id', userId);
+                $('#deleteConfirmModal').data('username', username);
+            });
+            
+            // Confirm delete action
+            $('#confirmDeleteBtn').click(function() {
+                var userId = $('#deleteConfirmModal').data('user-id');
+                var username = $('#deleteConfirmModal').data('username');
+                
+                console.log('Confirming delete for user ID:', userId);
+                
+                $.post('/Admin/DeleteEmployee', { userId: userId })
+                    .done(function(response) {
+                        console.log('Delete response:', response);
+                        if (response.success) {
+                            $('#deleteConfirmModal').modal('hide');
+                            alert(response.message);
+                            location.reload(); // Reload to show updated list
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.log('DeleteEmployee AJAX error:', xhr.responseText);
+                        alert('Có lỗi xảy ra khi xóa nhân viên: ' + error + '\nChi tiết: ' + xhr.responseText);
+                    });
+            });
+        });
+    </script>
+}

@@ -21,17 +21,34 @@ namespace WebBookStore.Filters
 
         protected override bool AuthorizeCore(HttpContextBase httpContext)
         {
-            // Kiểm tra user đã đăng nhập chưa
+            // Debug logging
+            System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] Checking authorization for role: {RequiredRole}");
+            System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] IsAuthenticated: {httpContext.User.Identity.IsAuthenticated}");
+            System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] User.Identity.Name: {httpContext.User.Identity.Name}");
+            
+            // Lấy role từ session TRƯỚC
+            var userRole = httpContext.Session["UserRole"] as string;
+            System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] Session UserRole: {userRole}");
+            
+            // Kiểm tra có session role không (ưu tiên session hơn FormsAuthentication)
+            if (!string.IsNullOrEmpty(userRole))
+            {
+                System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] Using session role: {userRole}");
+                var hasPermission = RoleConstants.HasPermission(userRole, RequiredRole);
+                System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] HasPermission: {hasPermission}");
+                return hasPermission;
+            }
+            
+            // Fallback: Kiểm tra user đã đăng nhập chưa
             if (!httpContext.User.Identity.IsAuthenticated)
             {
+                System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] User not authenticated and no session role, denying access");
                 return false;
             }
 
-            // Lấy role từ session
-            var userRole = httpContext.Session["UserRole"] as string;
-            
-            // Kiểm tra quyền
-            return RoleConstants.HasPermission(userRole, RequiredRole);
+            // Nếu có FormsAuthentication nhưng không có session role
+            System.Diagnostics.Debug.WriteLine($"[AUTHORIZE] Has FormsAuthentication but no session role, denying access");
+            return false;
         }
 
         protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)

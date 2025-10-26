@@ -20,6 +20,7 @@ namespace WebBookStore.Models
         // Role names
         public const string GUEST = "Guest";
         public const string CUSTOMER = "Customer";
+        public const string EMPLOYEE = "Employee";
         public const string ADMIN = "Admin";
 
         // Admin account (hardcoded)
@@ -82,4 +83,5 @@ namespace WebBookStore.Models
         }
     }
 }
+
 

@@ -1,17 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace WebBookStore.ViewModels
 {
-    public class LoginViewModel : Controller
+    /// <summary>
+    /// ViewModel cho trang đăng nhập - chứa dữ liệu form đăng nhập
+    /// </summary>
+    public class LoginViewModel
     {
-        // GET: LoginViewModel
-        public ActionResult Index()
-        {
-            return View();
-        }
+        [Required(ErrorMessage = "Email hoặc tên đăng nhập không được để trống")]
+        [Display(Name = "Email hoặc Tên đăng nhập")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Mật khẩu")]
+        public string Password { get; set; }
+
+        [Display(Name = "Ghi nhớ đăng nhập")]
+        public bool RememberMe { get; set; }
+
+        // URL để redirect sau khi đăng nhập thành công
+        public string ReturnUrl { get; set; }
     }
 }

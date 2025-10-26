@@ -32,11 +32,11 @@ namespace WebBookStore.Controllers
             _emailService = emailService;
         }
 
-        // GET: Account/Login
+        // GET: Account/Login - Redirect to home since we only use modal login
         public ActionResult Login(string returnUrl)
         {
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
+            // Since we removed the Login view, redirect to home
+            return RedirectToAction("Index", "Home");
         }
 
         // POST: Account/Login
@@ -100,12 +100,39 @@ namespace WebBookStore.Controllers
                 System.Diagnostics.Debug.WriteLine($"[LOGIN SUCCESS] User: {user.Username}, Role: {user.Role}");
                 System.Diagnostics.Debug.WriteLine($"[LOGIN SUCCESS] Session UserRole: {Session["UserRole"]}");
                 System.Diagnostics.Debug.WriteLine($"[LOGIN SUCCESS] IsAuthenticated: {User.Identity.IsAuthenticated}");
+                System.Diagnostics.Debug.WriteLine($"[LOGIN SUCCESS] RoleConstants.ADMIN: {RoleConstants.ADMIN}");
+                System.Diagnostics.Debug.WriteLine($"[LOGIN SUCCESS] user.Role == RoleConstants.ADMIN: {user.Role == RoleConstants.ADMIN}");
 
-                    // --- SỬA LỖI --- Trả về JSON cho AJAX request
-                    if (Request.IsAjaxRequest())
-                    {
-                        return Json(new { ok = true, message = "Đăng nhập thành công!" }, JsonRequestBehavior.AllowGet);
-                    }
+               // --- SỬA LỖI --- Trả về JSON cho AJAX request
+               if (Request.IsAjaxRequest())
+               {
+                   string redirectUrl = "/";
+                   if (user.Role == RoleConstants.ADMIN)
+                   {
+                       redirectUrl = "/Admin/Dashboard";
+                       System.Diagnostics.Debug.WriteLine($"[AJAX LOGIN] Admin detected, redirectUrl: {redirectUrl}");
+                       
+                       // Force server-side redirect for admin
+                       return Json(new { 
+                           ok = true, 
+                           message = "Đăng nhập thành công!", 
+                           redirectUrl = redirectUrl,
+                           forceRedirect = true
+                       }, JsonRequestBehavior.AllowGet);
+                   }
+                   else
+                   {
+                       System.Diagnostics.Debug.WriteLine($"[AJAX LOGIN] Non-admin user, redirectUrl: {redirectUrl}");
+                   }
+                   
+                   System.Diagnostics.Debug.WriteLine($"[AJAX LOGIN] Final JSON response: ok=true, redirectUrl={redirectUrl}");
+                   
+                   return Json(new { 
+                       ok = true, 
+                       message = "Đăng nhập thành công!", 
+                       redirectUrl = redirectUrl 
+                   }, JsonRequestBehavior.AllowGet);
+               }
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
@@ -125,25 +152,27 @@ namespace WebBookStore.Controllers
                 ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.Email = finalEmail; // Truyền email về view để giữ lại giá trị
-            if (Request.IsAjaxRequest())
-            {
+                if (Request.IsAjaxRequest())
+                {
                     return Json(new { ok = false, errors = new[] { "Email hoặc mật khẩu không đúng" } }, JsonRequestBehavior.AllowGet);
                 }
-                return View();
+                // For non-AJAX requests, redirect to home since we removed the Login view
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[ERROR] Login exception: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
 
-                if (Request.IsAjaxRequest())
-                {
+            if (Request.IsAjaxRequest())
+            {
                     return Json(new { ok = false, errors = new[] { "Có lỗi xảy ra: " + ex.Message } }, JsonRequestBehavior.AllowGet);
                 }
 
                 ModelState.AddModelError("", "Có lỗi xảy ra: " + ex.Message);
             ViewBag.Email = email; // Truyền email về view để giữ lại giá trị
-            return View();
+            // For non-AJAX requests, redirect to home since we removed the Login view
+            return RedirectToAction("Index", "Home");
             }
         }
 
@@ -277,7 +306,7 @@ namespace WebBookStore.Controllers
                 return Json(new { ok = true, message = "Đăng ký thành công!" }, JsonRequestBehavior.AllowGet);
             }
             TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
         // GET: Account/Logout - Xử lý khi click link đăng xuất
@@ -359,7 +388,7 @@ namespace WebBookStore.Controllers
             var userId = GetCurrentUserId();
             if (userId == null)
             {
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home");
             }
 
             var user = _context.Users.Find(userId);
@@ -445,7 +474,7 @@ namespace WebBookStore.Controllers
         {
             // For now, redirect to regular login with a message
             TempData["Message"] = $"Đăng nhập với {provider} đang được phát triển. Vui lòng sử dụng đăng nhập thông thường.";
-            return RedirectToAction("Login", new { returnUrl = returnUrl });
+            return RedirectToAction("Index", "Home");
         }
 
         [AllowAnonymous]
@@ -453,7 +482,7 @@ namespace WebBookStore.Controllers
         {
             // Placeholder for external login callback
             TempData["Message"] = "External login callback đang được phát triển.";
-            return RedirectToAction("Login", new { returnUrl = returnUrl });
+            return RedirectToAction("Index", "Home");
         }
 
         // Helper method to reset password for testing
@@ -840,6 +869,140 @@ namespace WebBookStore.Controllers
         public ActionResult AdminDebug()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Debug: Kiểm tra admin user trong database
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult CheckAdminUser()
+        {
+            try
+            {
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                
+                if (adminUser == null)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = "Không tìm thấy Admin user trong database",
+                        totalUsers = _context.Users.Count(),
+                        allUsers = _context.Users.Select(u => new { u.Username, u.Role, u.IsActive }).ToList()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                
+                // Test password verification with both passwords
+                var testPassword1 = "admin123";
+                var testPassword2 = "Bao@2004";
+                var passwordMatch1 = VerifyPassword(testPassword1, adminUser.PasswordHash);
+                var passwordMatch2 = VerifyPassword(testPassword2, adminUser.PasswordHash);
+                
+                return Json(new { 
+                    success = true, 
+                    adminInfo = new {
+                        userId = adminUser.UserId,
+                        username = adminUser.Username,
+                        email = adminUser.Email,
+                        fullName = adminUser.FullName,
+                        role = adminUser.Role,
+                        isActive = adminUser.IsActive,
+                        passwordHash = adminUser.PasswordHash,
+                        testPassword1 = testPassword1,
+                        passwordMatch1 = passwordMatch1,
+                        testPassword2 = testPassword2,
+                        passwordMatch2 = passwordMatch2,
+                        createdDate = adminUser.CreatedDate
+                    }
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Có lỗi xảy ra: " + ex.Message,
+                    stackTrace = ex.StackTrace
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Reset admin password với hash đúng
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult ResetAdminPasswordHash()
+        {
+            try
+            {
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                
+                if (adminUser == null)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = "Không tìm thấy Admin user" 
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                
+                // Reset password với hash đúng
+                var newPassword = "admin123";
+                var oldHash = adminUser.PasswordHash;
+                adminUser.PasswordHash = HashPassword(newPassword);
+                adminUser.IsActive = true;
+                
+                _context.SaveChanges();
+                
+                // Test verification
+                var passwordMatch = VerifyPassword(newPassword, adminUser.PasswordHash);
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Admin password đã được reset thành công!",
+                    adminInfo = new {
+                        username = adminUser.Username,
+                        email = adminUser.Email,
+                        newPassword = newPassword,
+                        oldHash = oldHash,
+                        newHash = adminUser.PasswordHash,
+                        passwordMatch = passwordMatch,
+                        isActive = adminUser.IsActive
+                    }
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Có lỗi xảy ra: " + ex.Message 
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Simple reset admin password
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult SimpleReset()
+        {
+            try
+            {
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                
+                if (adminUser == null)
+                {
+                    return Content("Không tìm thấy Admin user");
+                }
+                
+                // Reset password
+                adminUser.PasswordHash = HashPassword("admin123");
+                adminUser.IsActive = true;
+                _context.SaveChanges();
+                
+                return Content("Admin password đã được reset thành công!<br>Username: admin<br>Password: admin123");
+            }
+            catch (Exception ex)
+            {
+                return Content("Lỗi: " + ex.Message);
+            }
         }
 
     }
