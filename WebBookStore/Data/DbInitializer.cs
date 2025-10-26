@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using WebBookStore.Models;
+using System.Security.Cryptography;
 
 namespace WebBookStore.Data
 {
@@ -19,8 +20,34 @@ namespace WebBookStore.Data
             categories.ForEach(c => context.Categories.Add(c));
             context.SaveChanges();
 
-            var users = new List<User> { new User { Username = "testuser", PasswordHash = "123", Email = "test@test.com", FullName = "Test User", Role = "Customer", IsActive = true } };
-            users.ForEach(u => context.Users.Add(u));
+            // Code cứng tài khoản Admin
+            var adminUser = new User 
+            { 
+                Username = "admin", 
+                PasswordHash = HashPassword("admin123"), 
+                Email = "admin@sach50.com", 
+                FullName = "Quản Trị Viên", 
+                Role = "Admin", 
+                IsActive = true,
+                CreatedDate = DateTime.Now,
+                PhoneNumber = "0123456789",
+                Address = "Hệ thống quản trị"
+            };
+            context.Users.Add(adminUser);
+
+            // Thêm test user
+            var testUser = new User 
+            { 
+                Username = "testuser", 
+                PasswordHash = HashPassword("123456"), 
+                Email = "test@test.com", 
+                FullName = "Test User", 
+                Role = "Customer", 
+                IsActive = true,
+                CreatedDate = DateTime.Now
+            };
+            context.Users.Add(testUser);
+            
             context.SaveChanges();
 
             // Dữ liệu sách đã được sửa lại để dùng đúng các file ảnh tap1.png -> tap8.png
@@ -40,6 +67,20 @@ namespace WebBookStore.Data
             context.SaveChanges();
 
             base.Seed(context);
+        }
+
+        private string HashPassword(string password)
+        {
+            if (password == null)
+            {
+                password = string.Empty;
+            }
+
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", string.Empty).ToLowerInvariant();
+            }
         }
     }
 }

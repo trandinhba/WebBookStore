@@ -11,8 +11,8 @@
                 {
                     @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label class="form-label">Tài khoản</label>
-                        <input name="Email" class="form-control" type="email" placeholder="Nhập tên tài khoản của bạn" required />
+                        <label class="form-label">Email</label>
+                        <input name="Email" class="form-control" type="email" placeholder="Nhập địa chỉ email" required />
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Mật khẩu</label>
@@ -28,6 +28,24 @@
                     <div class="text-danger small" id="loginErrors"></div>
                     <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
                 }
+
+                <!-- Social Login -->
+                <div class="text-center my-3">
+                    <div class="position-relative">
+                        <hr class="my-3">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">Hoặc</span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="showComingSoon('Google')">
+                        <i class="bi bi-google me-2"></i>Đăng nhập với Google
+                    </button>
+                    
+                    <button type="button" class="btn btn-primary w-100" style="background-color: #1877f2; border-color: #1877f2;" onclick="showComingSoon('Facebook')">
+                        <i class="bi bi-facebook me-2"></i>Đăng nhập với Facebook
+                    </button>
+                </div>
 
                 <div class="text-center mt-3 small">
                     Chưa có tài khoản? <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal" data-bs-dismiss="modal">Đăng ký ngay</a>
@@ -55,8 +73,12 @@
                 {
                     @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label class="form-label">Tên tài khoản</label>
-                        <input name="Email" class="form-control" type="email" placeholder="Nhập tên tài khoản" required />
+                        <label class="form-label">Họ tên người dùng</label>
+                        <input name="FullName" class="form-control" type="text" placeholder="Nhập họ tên đầy đủ" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input name="Email" class="form-control" type="email" placeholder="Nhập địa chỉ email" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Số điện thoại</label>
@@ -75,6 +97,24 @@
                     <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
                 }
 
+                <!-- Social Login -->
+                <div class="text-center my-3">
+                    <div class="position-relative">
+                        <hr class="my-3">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">Hoặc</span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="showComingSoon('Google')">
+                        <i class="bi bi-google me-2"></i>Đăng ký với Google
+                    </button>
+                    
+                    <button type="button" class="btn btn-primary w-100" style="background-color: #1877f2; border-color: #1877f2;" onclick="showComingSoon('Facebook')">
+                        <i class="bi bi-facebook me-2"></i>Đăng ký với Facebook
+                    </button>
+                </div>
+
                 <div class="text-center mt-3 small">
                     Đã có tài khoản? <a href="#" data-bs-target="#loginModal" data-bs-toggle="modal" data-bs-dismiss="modal">Đăng nhập</a>
                 </div>
@@ -89,22 +129,85 @@
             if(!form) return;
             form.addEventListener('submit', function(e){
                 e.preventDefault();
-                var data = new FormData(form);
+                var submitBtn = form.querySelector('button[type="submit"]');
+                var originalText = submitBtn.innerHTML;
+                
+                // Show loading state
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+                submitBtn.disabled = true;
+                
+                // Clear previous errors
+                document.getElementById(errorId).innerHTML = '';
+                
+                // Get form data
+                var formData = new FormData(form);
+                
+                // Debug: Log form data
+                console.log('Form data being sent:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', form.action, true);
                 xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
                 xhr.onload = function(){
                     try{
                         var res = JSON.parse(xhr.responseText||'{}');
-                        if(res.ok){ location.reload(); return; }
-                        document.getElementById(errorId).innerText = (res.errors||['Có lỗi xảy ra']).join('\n');
-                    }catch(err){ document.getElementById(errorId).innerText = 'Có lỗi xảy ra'; }
+                        console.log('Response:', res);
+                        
+                        // Check for both 'ok' and 'success' properties
+                        if(res.ok || res.success){ 
+                            // Show success message
+                            document.getElementById(errorId).innerHTML = '<div class="alert alert-success small mb-0">' + (res.message || 'Thành công!') + '</div>';
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                            return; 
+                        }
+                        var errorHtml = '<div class="alert alert-danger small mb-0">' + (res.errors||['Có lỗi xảy ra']).join('<br>') + '</div>';
+                        document.getElementById(errorId).innerHTML = errorHtml;
+                    }catch(err){ 
+                        console.error('Error parsing response:', err);
+                        console.error('Response text:', xhr.responseText);
+                        document.getElementById(errorId).innerHTML = '<div class="alert alert-danger small mb-0">Có lỗi xảy ra: ' + err.message + '</div>';
+                    }
+                    
+                    // Reset button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 };
-                xhr.send(new URLSearchParams(new FormData(form)));
+                xhr.onerror = function() {
+                    console.error('XHR Error');
+                    document.getElementById(errorId).innerHTML = '<div class="alert alert-danger small mb-0">Có lỗi xảy ra</div>';
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                };
+                
+                // Send as URLSearchParams instead of FormData
+                var params = new URLSearchParams();
+                for (var pair of formData.entries()) {
+                    params.append(pair[0], pair[1]);
+                }
+                xhr.send(params);
             });
         }
         ajaxSubmit('loginForm','loginErrors');
         ajaxSubmit('registerForm','registerErrors');
+        
+        // Clear errors when modal is shown
+        $('#loginModal').on('show.bs.modal', function() {
+            $('#loginErrors').empty();
+        });
+        
+        $('#registerModal').on('show.bs.modal', function() {
+            $('#registerErrors').empty();
+        });
+        
+        // Function to show coming soon message
+        window.showComingSoon = function(provider) {
+            alert('Đăng nhập với ' + provider + ' đang được phát triển. Vui lòng sử dụng đăng nhập thông thường.');
+        };
     })();
 </script>
 

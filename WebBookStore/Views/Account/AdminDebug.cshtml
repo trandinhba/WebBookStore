@@ -1,0 +1,176 @@
+@{
+    ViewBag.Title = "Admin Debug";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Admin Account Debug
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Hướng dẫn</h5>
+                        <p>Nếu bạn không thể đăng nhập với tài khoản Admin, hãy sử dụng các nút bên dưới để kiểm tra và reset Admin account.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Kiểm tra Admin Account</h5>
+                                </div>
+                                <div class="card-body">
+                                    <button type="button" class="btn btn-info w-100" onclick="testAdminLogin()">
+                                        <i class="fas fa-search me-2"></i>
+                                        Kiểm tra Admin Account
+                                    </button>
+                                    <div id="testResult" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Reset Admin Account</h5>
+                                </div>
+                                <div class="card-body">
+                                    <button type="button" class="btn btn-warning w-100" onclick="resetAdminAccount()">
+                                        <i class="fas fa-refresh me-2"></i>
+                                        Reset Admin Account
+                                    </button>
+                                    <div id="resetResult" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Thông tin đăng nhập Admin</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Username:</strong> <code>admin</code></p>
+                                        <p><strong>Email:</strong> <code>admin@sach50.com</code></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Password:</strong> <code>admin123</code></p>
+                                        <p><strong>Role:</strong> <span class="badge bg-danger">Admin</span></p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Lưu ý:</strong> Bạn có thể đăng nhập bằng Username hoặc Email. Password phải chính xác là "admin123".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Thử đăng nhập lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function testAdminLogin() {
+        var btn = event.target;
+        var originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang kiểm tra...';
+        btn.disabled = true;
+        
+        $.get('@Url.Action("TestAdminLogin", "Account")')
+            .done(function(response) {
+                if (response.success) {
+                    var html = `
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle me-2"></i>Admin Account Tồn Tại</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Username:</strong> ${response.adminInfo.username}</p>
+                                    <p><strong>Email:</strong> ${response.adminInfo.email}</p>
+                                    <p><strong>Full Name:</strong> ${response.adminInfo.fullName}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Active:</strong> ${response.adminInfo.isActive ? '<span class="badge bg-success">Có</span>' : '<span class="badge bg-danger">Không</span>'}</p>
+                                    <p><strong>Password Match:</strong> ${response.adminInfo.passwordMatch ? '<span class="badge bg-success">Đúng</span>' : '<span class="badge bg-danger">Sai</span>'}</p>
+                                </div>
+                            </div>
+                            <p><strong>Password Hash:</strong> <code>${response.adminInfo.passwordHash}</code></p>
+                        </div>
+                    `;
+                    $('#testResult').html(html);
+                } else {
+                    $('#testResult').html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>${response.message}</div>`);
+                }
+            })
+            .fail(function() {
+                $('#testResult').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Có lỗi xảy ra khi kiểm tra</div>');
+            })
+            .always(function() {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    function resetAdminAccount() {
+        if (!confirm('Bạn có chắc chắn muốn reset Admin account? Password sẽ được đặt lại về "admin123".')) {
+            return;
+        }
+        
+        var btn = event.target;
+        var originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang reset...';
+        btn.disabled = true;
+        
+        $.get('@Url.Action("CheckAndResetAdmin", "Account")')
+            .done(function(response) {
+                if (response.success) {
+                    var html = `
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle me-2"></i>${response.message}</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Username:</strong> ${response.adminInfo.username}</p>
+                                    <p><strong>Email:</strong> ${response.adminInfo.email}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Password:</strong> <code>${response.adminInfo.password}</code></p>
+                                </div>
+                            </div>
+                            ${response.adminInfo.oldHash ? `<p><strong>Old Hash:</strong> <code>${response.adminInfo.oldHash}</code></p>` : ''}
+                            ${response.adminInfo.newHash ? `<p><strong>New Hash:</strong> <code>${response.adminInfo.newHash}</code></p>` : ''}
+                        </div>
+                    `;
+                    $('#resetResult').html(html);
+                } else {
+                    $('#resetResult').html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>${response.message}</div>`);
+                }
+            })
+            .fail(function() {
+                $('#resetResult').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Có lỗi xảy ra khi reset</div>');
+            })
+            .always(function() {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+</script>
+

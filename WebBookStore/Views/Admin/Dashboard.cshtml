@@ -1,7 +1,85 @@
-﻿
-@{
-    ViewBag.Title = "Dashboard";
+﻿@{
+    ViewBag.Title = "Trang Quản Lý";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h2>Dashboard</h2>
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">60</div>
+        <div class="stat-label">Chưa giải quyết</div>
+    </div>
+    <div class="stat-card active">
+        <div class="stat-number">16</div>
+        <div class="stat-label">Quá hạn</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">43</div>
+        <div class="stat-label">Đang làm</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">64</div>
+        <div class="stat-label">Chờ duyệt</div>
+    </div>
+</div>
 
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Left Panel -->
+    <div class="content-panel">
+        <div class="panel-header">
+            <h3>Yêu cầu chưa giải quyết</h3>
+            <a href="#" class="view-details">Xem chi tiết</a>
+        </div>
+        <div class="panel-content">
+            <div class="request-item">
+                <span class="request-label">Chờ giải quyết</span>
+                <span class="request-count">4238</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Báo lỗi từ khách hàng</span>
+                <span class="request-count">1005</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Chờ fix từ dev</span>
+                <span class="request-count">914</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Chờ duyệt</span>
+                <span class="request-count">281</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="content-panel">
+        <div class="panel-header">
+            <h3>Công việc</h3>
+            <a href="#" class="view-all">Xem tất cả</a>
+        </div>
+        <div class="panel-content">
+            <div class="task-section">
+                <h4>Hôm nay</h4>
+                <div class="task-input">
+                    <input type="text" placeholder="Tạo công việc mới" class="task-input-field">
+                    <button class="add-task-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="task-item">
+                    <input type="radio" id="task1" name="task">
+                    <label for="task1">Duyệt yêu cầu sửa lỗi</label>
+                </div>
+                <div class="task-item">
+                    <input type="radio" id="task2" name="task">
+                    <label for="task2">Fix lỗi</label>
+                </div>
+                <div class="task-item completed">
+                    <input type="checkbox" id="task3" checked>
+                    <label for="task3">Giải quyết lỗi giao diện</label>
+                    <span class="default-tag">DEFAULT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

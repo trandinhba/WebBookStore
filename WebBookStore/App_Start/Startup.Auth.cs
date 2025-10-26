@@ -45,24 +45,17 @@ namespace WebBookStore
             // This is similar to the RememberMe option when you log in.
             app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
-            // Uncomment the following lines to enable logging in with third party login providers
-            //app.UseMicrosoftAccountAuthentication(
-            //    clientId: "",
-            //    clientSecret: "");
+            // Enable third party login providers
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+                ClientId = System.Configuration.ConfigurationManager.AppSettings["GoogleClientId"] ?? "",
+                ClientSecret = System.Configuration.ConfigurationManager.AppSettings["GoogleClientSecret"] ?? "",
+                CallbackPath = new PathString("/signin-google")
+            });
 
-            //app.UseTwitterAuthentication(
-            //   consumerKey: "",
-            //   consumerSecret: "");
-
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
-
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseFacebookAuthentication(
+               appId: System.Configuration.ConfigurationManager.AppSettings["FacebookAppId"] ?? "",
+               appSecret: System.Configuration.ConfigurationManager.AppSettings["FacebookAppSecret"] ?? "");
         }
     }
 }

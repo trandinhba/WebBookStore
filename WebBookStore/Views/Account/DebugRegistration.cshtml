@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Registration Issue</title>
+    <meta charset="utf-8" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 15px; margin: 5px; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Registration Issue</h1>
+    
+    <div class="section">
+        <h2>Test 1: Register New User</h2>
+        <form id="registerForm">
+            <div>
+                <label>Họ tên:</label>
+                <input type="text" name="FullName" value="trần đình bá" required />
+            </div>
+            <div>
+                <label>Email:</label>
+                <input type="email" name="Email" value="trandinba@gmail.com" required />
+            </div>
+            <div>
+                <label>Số điện thoại:</label>
+                <input type="tel" name="PhoneNumber" value="0912345678" />
+            </div>
+            <div>
+                <label>Mật khẩu:</label>
+                <input type="password" name="Password" value="123456" required />
+            </div>
+            <div>
+                <label>Nhập lại mật khẩu:</label>
+                <input type="password" name="ConfirmPassword" value="123456" required />
+            </div>
+            <button type="submit">Đăng ký</button>
+        </form>
+        <div id="registerResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Test 2: Login Test</h2>
+        <form id="loginForm">
+            <div>
+                <label>Email:</label>
+                <input type="email" name="Email" value="trandinba@gmail.com" required />
+            </div>
+            <div>
+                <label>Mật khẩu:</label>
+                <input type="password" name="Password" value="123456" required />
+            </div>
+            <button type="submit">Đăng nhập</button>
+        </form>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Test 3: Check Profile</h2>
+        <button onclick="checkProfile()">Kiểm tra Profile</button>
+        <div id="profileResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Test 4: Database Check</h2>
+        <button onclick="checkDatabase()">Kiểm tra Database</button>
+        <div id="databaseResult"></div>
+    </div>
+
+    <script>
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            var params = new URLSearchParams();
+            for (var pair of formData.entries()) {
+                params.append(pair[0], pair[1]);
+            }
+            
+            fetch('/Account/Register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('registerResult').innerHTML = 
+                    '<div class="' + (data.ok ? 'success' : 'error') + '">' + 
+                    (data.ok ? 'Đăng ký thành công!' : 'Đăng ký thất bại: ' + (data.errors ? data.errors.join(', ') : 'Unknown error')) + 
+                    '</div>';
+            })
+            .catch(error => {
+                document.getElementById('registerResult').innerHTML = 
+                    '<div class="error">Error: ' + error.message + '</div>';
+            });
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            var params = new URLSearchParams();
+            for (var pair of formData.entries()) {
+                params.append(pair[0], pair[1]);
+            }
+            
+            fetch('/Account/Login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loginResult').innerHTML = 
+                    '<div class="' + (data.ok ? 'success' : 'error') + '">' + 
+                    (data.ok ? 'Đăng nhập thành công!' : 'Đăng nhập thất bại: ' + (data.errors ? data.errors.join(', ') : 'Unknown error')) + 
+                    '</div>';
+            })
+            .catch(error => {
+                document.getElementById('loginResult').innerHTML = 
+                    '<div class="error">Error: ' + error.message + '</div>';
+            });
+        });
+
+        // Check profile
+        function checkProfile() {
+            fetch('/Account/Profile')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('profileResult').innerHTML = 
+                        '<div class="info">Profile page loaded. Check browser console for debug logs.</div>';
+                })
+                .catch(error => {
+                    document.getElementById('profileResult').innerHTML = 
+                        '<div class="error">Error: ' + error.message + '</div>';
+                });
+        }
+
+        // Check database
+        function checkDatabase() {
+            fetch('/Account/LoginDebug')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('databaseResult').innerHTML = 
+                        '<div class="info">Database check page loaded. Check browser console for debug logs.</div>';
+                })
+                .catch(error => {
+                    document.getElementById('databaseResult').innerHTML = 
+                        '<div class="error">Error: ' + error.message + '</div>';
+                });
+        }
+    </script>
+</body>
+</html>
+

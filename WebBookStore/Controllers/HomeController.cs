@@ -2,6 +2,8 @@
 using WebBookStore.Services;
 using WebBookStore.Data;
 using WebBookStore.Repositories;
+using WebBookStore.Filters;
+using WebBookStore.Helpers;
 
 namespace WebBookStore.Controllers
 {
@@ -22,6 +24,7 @@ namespace WebBookStore.Controllers
         }
 
         // GET: Home
+        [AllowGuest]
         public ActionResult Index()
         {
             var bestSellingBooks = _bookService.GetBestSellingBooks(8);
@@ -29,7 +32,8 @@ namespace WebBookStore.Controllers
 
             ViewBag.BestSellingBooks = bestSellingBooks;
             ViewBag.NewBooks = newBooks;
-
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
+            
             return View();
         }
 
