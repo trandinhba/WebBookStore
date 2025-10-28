@@ -1,0 +1,350 @@
+@{
+    ViewBag.Title = "Cài Đặt Hệ Thống";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">@ViewBag.Title</h1>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
+@if (ViewBag.Stats != null)
+{
+    <!-- System Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.TotalBooks</div>
+                <div class="stat-label">Tổng số sách</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.TotalUsers</div>
+                <div class="stat-label">Tổng số người dùng</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.TotalOrders</div>
+                <div class="stat-label">Tổng số đơn hàng</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.TotalCategories</div>
+                <div class="stat-label">Danh mục</div>
+            </div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.LowStockBooks</div>
+                <div class="stat-label">Sách sắp hết hàng</div>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">@ViewBag.Stats.PendingOrders</div>
+                <div class="stat-label">Đơn hàng chờ xử lý</div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- System Actions -->
+<div class="settings-grid">
+    <!-- Database Management -->
+    <div class="settings-card">
+        <div class="card-header">
+            <h3><i class="fas fa-database me-2"></i>Quản Lý Database</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Thực hiện các tác vụ quản lý database</p>
+            <div class="action-buttons">
+                <button class="btn btn-outline-primary w-100 mb-2" onclick="backupDatabase()">
+                    <i class="fas fa-save me-2"></i>Sao lưu Database
+                </button>
+                <button class="btn btn-outline-warning w-100 mb-2" onclick="optimizeDatabase()">
+                    <i class="fas fa-tools me-2"></i>Tối ưu Database
+                </button>
+                <button class="btn btn-outline-info w-100">
+                    <i class="fas fa-chart-bar me-2"></i>Xem Thống Kê Chi Tiết
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Configuration -->
+    <div class="settings-card">
+        <div class="card-header">
+            <h3><i class="fas fa-cog me-2"></i>Cài Đặt Hệ Thống</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Cấu hình các thông số hệ thống</p>
+            <div class="action-buttons">
+                <button class="btn btn-outline-primary w-100 mb-2" onclick="configureSystem()">
+                    <i class="fas fa-sliders-h me-2"></i>Cấu Hình Chung
+                </button>
+                <button class="btn btn-outline-success w-100 mb-2" onclick="configureEmail()">
+                    <i class="fas fa-envelope me-2"></i>Cấu Hình Email
+                </button>
+                <button class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-bell me-2"></i>Cấu Hình Thông Báo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="settings-card">
+        <div class="card-header">
+            <h3><i class="fas fa-shield-alt me-2"></i>Bảo Mật</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Quản lý bảo mật và quyền truy cập</p>
+            <div class="action-buttons">
+                <button class="btn btn-outline-danger w-100 mb-2" onclick="resetAdminPassword()">
+                    <i class="fas fa-key me-2"></i>Reset Mật Khẩu Admin
+                </button>
+                <button class="btn btn-outline-warning w-100 mb-2" onclick="viewLogs()">
+                    <i class="fas fa-file-alt me-2"></i>Xem Log Hệ Thống
+                </button>
+                <button class="btn btn-outline-primary w-100">
+                    <i class="fas fa-user-shield me-2"></i>Quản Lý Quyền Truy Cập
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="settings-card">
+        <div class="card-header">
+            <h3><i class="fas fa-wrench me-2"></i>Bảo Trì</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Các tác vụ bảo trì hệ thống</p>
+            <div class="action-buttons">
+                <button class="btn btn-outline-info w-100 mb-2" onclick="clearCache()">
+                    <i class="fas fa-broom me-2"></i>Xóa Cache
+                </button>
+                <button class="btn btn-outline-secondary w-100 mb-2" onclick="cleanLogs()">
+                    <i class="fas fa-trash me-2"></i>Dọn Dẹp Log Cũ
+                </button>
+                <button class="btn btn-outline-primary w-100">
+                    <i class="fas fa-sync me-2"></i>Kiểm Tra Cập Nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .stat-card.warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+
+    .stat-card.info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stat-card.warning .stat-icon {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .stat-card.info .stat-icon {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .settings-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .settings-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .card-body p {
+        margin-bottom: 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-buttons .btn {
+        transition: all 0.3s ease;
+    }
+
+    .action-buttons .btn:hover {
+        transform: translateX(5px);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function backupDatabase() {
+            if (confirm('Bạn có chắc chắn muốn sao lưu database?')) {
+                alert('Chức năng này đang được phát triển');
+            }
+        }
+
+        function optimizeDatabase() {
+            if (confirm('Bạn có chắc chắn muốn tối ưu database?')) {
+                alert('Chức năng này đang được phát triển');
+            }
+        }
+
+        function configureSystem() {
+            alert('Chức năng này đang được phát triển');
+        }
+
+        function configureEmail() {
+            alert('Chức năng này đang được phát triển');
+        }
+
+        function resetAdminPassword() {
+            if (confirm('Bạn có chắc chắn muốn reset mật khẩu Admin?\nMật khẩu mới sẽ là: admin123')) {
+                $.ajax({
+                    url: '@Url.Action("ResetAdminPassword", "Admin")',
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Reset mật khẩu thành công!\nMật khẩu mới: ' + response.newPassword);
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi reset mật khẩu');
+                    }
+                });
+            }
+        }
+
+        function viewLogs() {
+            alert('Chức năng này đang được phát triển');
+        }
+
+        function clearCache() {
+            if (confirm('Bạn có chắc chắn muốn xóa cache?')) {
+                alert('Chức năng này đang được phát triển');
+            }
+        }
+
+        function cleanLogs() {
+            if (confirm('Bạn có chắc chắn muốn dọn dẹp log cũ?')) {
+                alert('Chức năng này đang được phát triển');
+            }
+        }
+    </script>
+}
+

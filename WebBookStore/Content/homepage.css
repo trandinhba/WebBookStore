@@ -91,26 +91,26 @@
 /* Main Content */
 .main-content {
     background-color: #ffffff;
-    padding: 2rem 0;
+    padding: 0;
 }
 
 /* Promotional Banners */
 .promo-section {
-    margin-bottom: 2rem;
+    margin: 0;
 }
 
 .promo-main {
     background-color: #ffffff;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 3rem 2rem;
+    border: none;
+    border-radius: 0;
+    padding: 0;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
     transition: box-shadow 0.3s ease;
 }
 
 .promo-main:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 .promo-main h2 {
@@ -148,16 +148,17 @@
 /* Product Section */
 .product-section {
     background-color: #ffffff;
-    padding: 2rem 0;
+    padding: 0;
+    margin-top: 0;
 }
 
 .section-banner {
     background-color: #007bff;
     color: #ffffff;
     padding: 1rem 2rem;
-    margin-bottom: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .section-banner h2 {

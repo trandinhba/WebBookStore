@@ -1,0 +1,403 @@
+@model WebBookStore.Models.Order
+
+@{
+    ViewBag.Title = "Chi Tiết Đơn Hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">Chi Tiết Đơn Hàng #@Model.Id</h1>
+        <a href="@Url.Action("ManageOrders", "Admin")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
+<div class="row">
+    <!-- Order Information -->
+    <div class="col-md-8">
+        <div class="order-details-section">
+            <div class="section-header">
+                <h3 class="section-title">Thông Tin Đơn Hàng</h3>
+                <span class="status-badge status-@Model.Status.ToString().ToLower()">
+                    @switch (Model.Status)
+                    {
+                        case WebBookStore.Models.OrderStatus.Pending:
+                            <text>Chờ xử lý</text>
+                            break;
+                        case WebBookStore.Models.OrderStatus.Processing:
+                            <text>Đang xử lý</text>
+                            break;
+                        case WebBookStore.Models.OrderStatus.Shipped:
+                            <text>Đã giao</text>
+                            break;
+                        case WebBookStore.Models.OrderStatus.Delivered:
+                            <text>Hoàn thành</text>
+                            break;
+                        case WebBookStore.Models.OrderStatus.Cancelled:
+                            <text>Đã hủy</text>
+                            break;
+                    }
+                </span>
+            </div>
+
+            <div class="section-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-group">
+                            <label class="info-label">Mã đơn hàng:</label>
+                            <span class="info-value">#@Model.Id</span>
+                        </div>
+                        <div class="info-group">
+                            <label class="info-label">Ngày đặt:</label>
+                            <span class="info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <div class="info-group">
+                            <label class="info-label">Cập nhật lần cuối:</label>
+                            <span class="info-value">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-group">
+                            <label class="info-label">Phương thức thanh toán:</label>
+                            <span class="info-value">@(Model.PaymentMethod ?? "Chưa xác định")</span>
+                        </div>
+                        <div class="info-group">
+                            <label class="info-label">Tổng tiền:</label>
+                            <span class="info-value total-amount">@Model.Total.ToString("N0") ₫</span>
+                        </div>
+                        @if (Model.DiscountAmount > 0)
+                        {
+                            <div class="info-group">
+                                <label class="info-label">Giảm giá:</label>
+                                <span class="info-value discount-amount">-@Model.DiscountAmount.ToString("N0") ₫</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <label class="info-label">Địa chỉ giao hàng:</label>
+                    <div class="info-value address-text">@Model.ShippingAddress</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items-section">
+            <div class="section-header">
+                <h3 class="section-title">Sản Phẩm Đã Đặt</h3>
+            </div>
+            <div class="section-content">
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-box-open fa-2x mb-2"></i><br>
+                    Chi tiết sản phẩm sẽ được hiển thị khi có dữ liệu
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Information & Actions -->
+    <div class="col-md-4">
+        <!-- Customer Info -->
+        <div class="customer-section">
+            <div class="section-header">
+                <h3 class="section-title">Thông Tin Khách Hàng</h3>
+            </div>
+            <div class="section-content">
+                <div class="customer-info">
+                    <div class="customer-avatar">
+                        <div class="avatar-circle">U</div>
+                    </div>
+                    <div class="customer-details">
+                        <div class="customer-name">Khách hàng #@Model.UserId</div>
+                        <div class="customer-email">ID: @Model.UserId</div>
+                        <div class="customer-phone">Thông tin chi tiết sẽ được cập nhật</div>
+                        <div class="customer-role">
+                            <span class="role-badge">Customer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="order-actions-section">
+            <div class="section-header">
+                <h3 class="section-title">Thao Tác</h3>
+            </div>
+            <div class="section-content">
+                <div class="action-buttons">
+                    @if (Model.Status == WebBookStore.Models.OrderStatus.Pending)
+                    {
+                        <button class="btn btn-primary w-100 mb-2" onclick="updateOrderStatus(@Model.Id, 'Processing')">
+                            <i class="fas fa-play me-2"></i>Bắt đầu xử lý
+                        </button>
+                    }
+                    @if (Model.Status == WebBookStore.Models.OrderStatus.Processing)
+                    {
+                        <button class="btn btn-success w-100 mb-2" onclick="updateOrderStatus(@Model.Id, 'Shipped')">
+                            <i class="fas fa-truck me-2"></i>Đã giao hàng
+                        </button>
+                    }
+                    @if (Model.Status == WebBookStore.Models.OrderStatus.Shipped)
+                    {
+                        <button class="btn btn-info w-100 mb-2" onclick="updateOrderStatus(@Model.Id, 'Delivered')">
+                            <i class="fas fa-check me-2"></i>Hoàn thành
+                        </button>
+                    }
+                    @if (Model.Status != WebBookStore.Models.OrderStatus.Cancelled && Model.Status != WebBookStore.Models.OrderStatus.Delivered)
+                    {
+                        <button class="btn btn-danger w-100 mb-2" onclick="updateOrderStatus(@Model.Id, 'Cancelled')">
+                            <i class="fas fa-times me-2"></i>Hủy đơn hàng
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-details-section,
+    .order-items-section,
+    .customer-section,
+    .order-actions-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .section-content {
+        padding: 25px;
+    }
+
+    .info-group {
+        margin-bottom: 15px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-size: 15px;
+    }
+
+    .total-amount {
+        font-weight: 700;
+        color: #28a745;
+        font-size: 18px;
+    }
+
+    .discount-amount {
+        font-weight: 600;
+        color: #dc3545;
+    }
+
+    .address-text {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-processing {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-shipped {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-delivered {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .items-list {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .item-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 15px;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f3f4;
+        align-items: center;
+    }
+
+    .item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .item-details {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .item-quantity,
+    .item-price,
+    .item-total {
+        text-align: center;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .item-total {
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    .customer-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .customer-avatar .avatar-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .customer-email,
+    .customer-phone {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+    .role-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .action-buttons .btn {
+        transition: all 0.3s ease;
+    }
+
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+        .item-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            text-align: center;
+        }
+        
+        .customer-info {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function updateOrderStatus(orderId, status) {
+            if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này?')) {
+                $.ajax({
+                    url: '@Url.Action("UpdateOrderStatus", "Admin")',
+                    type: 'POST',
+                    data: {
+                        orderId: orderId,
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng');
+                    }
+                });
+            }
+        }
+    </script>
+}

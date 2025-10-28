@@ -466,23 +466,140 @@ namespace WebBookStore.Controllers
 
         // ... (Các phương thức External Login và Helper khác không thay đổi) ...
 
-        // External Login Methods - Simplified version
+        // External Login Methods - Facebook
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult ExternalLogin(string provider, string returnUrl)
         {
-            // For now, redirect to regular login with a message
+            // OAuth URL configuration
+            string redirectUri = Url.Action("ExternalLoginCallback", "Account", null, Request.Url.Scheme);
+            
+            if (provider.ToLower() == "facebook")
+            {
+                string appId = "YOUR_FACEBOOK_APP_ID"; // TODO: Replace with actual App ID
+                string facebookUrl = $"https://www.facebook.com/v13.0/dialog/oauth?client_id={appId}&redirect_uri={redirectUri}&scope=email";
+                return Redirect(facebookUrl);
+            }
+            else if (provider.ToLower() == "google")
+            {
+                string clientId = "YOUR_GOOGLE_CLIENT_ID"; // TODO: Replace with actual Client ID
+                string googleUrl = $"https://accounts.google.com/o/oauth2/v2/auth?client_id={clientId}&redirect_uri={redirectUri}&response_type=code&scope=email profile&access_type=offline";
+                return Redirect(googleUrl);
+            }
+            
             TempData["Message"] = $"Đăng nhập với {provider} đang được phát triển. Vui lòng sử dụng đăng nhập thông thường.";
             return RedirectToAction("Index", "Home");
         }
 
         [AllowAnonymous]
-        public ActionResult ExternalLoginCallback(string returnUrl)
+        public ActionResult ExternalLoginCallback(string code, string returnUrl)
         {
-            // Placeholder for external login callback
-            TempData["Message"] = "External login callback đang được phát triển.";
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                // Get user info from OAuth provider
+                // TODO: Implement OAuth token exchange and user info retrieval
+                
+                // For now, create a demo user
+                var externalUser = new User
+                {
+                    Username = "external_user_" + DateTime.Now.Ticks,
+                    Email = "external@example.com",
+                    FullName = "External User",
+                    PasswordHash = HashPassword("external"),
+                    Role = RoleConstants.CUSTOMER,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
+                };
+
+                _context.Users.Add(externalUser);
+                _context.SaveChanges();
+
+                Session["UserId"] = externalUser.UserId;
+                Session["Username"] = externalUser.Username;
+                Session["UserRole"] = externalUser.Role;
+                FormsAuthentication.SetAuthCookie(externalUser.Username, false);
+
+                TempData["Message"] = "Đăng nhập thành công!";
+                
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                
+                if (externalUser.Role == RoleConstants.ADMIN)
+                {
+                    return RedirectToAction("Dashboard", "Admin");
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = "Có lỗi xảy ra trong quá trình đăng nhập: " + ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        
+        // Register with Social Providers
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult RegisterWithFacebook(string accessToken)
+        {
+            try
+            {
+                // TODO: Verify Facebook access token and get user info
+                // For demo purposes, create a user
+                var user = new User
+                {
+                    Username = "fb_user_" + DateTime.Now.Ticks,
+                    Email = "facebook@example.com",
+                    FullName = "Facebook User",
+                    PasswordHash = HashPassword("facebook_login"),
+                    Role = RoleConstants.CUSTOMER,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
+                };
+                
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                
+                return Json(new { ok = true, message = "Đăng ký thành công!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult RegisterWithGoogle(string idToken)
+        {
+            try
+            {
+                // TODO: Verify Google ID token and get user info
+                // For demo purposes, create a user
+                var user = new User
+                {
+                    Username = "google_user_" + DateTime.Now.Ticks,
+                    Email = "google@example.com",
+                    FullName = "Google User",
+                    PasswordHash = HashPassword("google_login"),
+                    Role = RoleConstants.CUSTOMER,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
+                };
+                
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                
+                return Json(new { ok = true, message = "Đăng ký thành công!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // Helper method to reset password for testing

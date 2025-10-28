@@ -1,0 +1,80 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#f5f5dc"/>
+  
+  <!-- Decorative noise pattern -->
+  <defs>
+    <filter id="noise">
+      <feTurbulence baseFrequency="0.9" numOctaves="4" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="800" height="400" fill="url(#noise)" opacity="0.1"/>
+  
+  <!-- Books scattered around -->
+  <!-- Top left book -->
+  <g transform="translate(50, 30)">
+    <rect x="0" y="0" width="60" height="80" fill="#ff8c00" rx="3"/>
+    <rect x="5" y="5" width="50" height="70" fill="#f5f5dc"/>
+    <rect x="10" y="10" width="40" height="60" fill="#f5f5dc"/>
+  </g>
+  
+  <!-- Top right book -->
+  <g transform="translate(650, 40)">
+    <rect x="0" y="0" width="60" height="80" fill="#2c3e50" rx="3"/>
+    <rect x="5" y="5" width="50" height="70" fill="#f5f5dc"/>
+    <rect x="10" y="10" width="40" height="60" fill="#f5f5dc"/>
+  </g>
+  
+  <!-- Middle top book -->
+  <g transform="translate(350, 20)">
+    <rect x="0" y="0" width="50" height="70" fill="#ff8c00" rx="3"/>
+  </g>
+  
+  <!-- Bottom left stacked books -->
+  <g transform="translate(80, 280)">
+    <rect x="0" y="0" width="50" height="70" fill="#e74c3c" rx="3"/>
+    <rect x="5" y="5" width="50" height="70" fill="#2c3e50" rx="3"/>
+  </g>
+  
+  <!-- Bottom middle stacked books -->
+  <g transform="translate(350, 290)">
+    <rect x="0" y="0" width="50" height="70" fill="#2c3e50" rx="3"/>
+    <rect x="5" y="5" width="50" height="70" fill="#e74c3c" rx="3"/>
+  </g>
+  
+  <!-- Coffee cup bottom right -->
+  <g transform="translate(650, 300)">
+    <ellipse cx="25" cy="35" rx="20" ry="25" fill="#ffd700"/>
+    <rect x="15" y="20" width="20" height="30" fill="#8b4513" rx="2"/>
+    <path d="M 45 25 Q 55 20 65 25" stroke="#8b4513" stroke-width="2" fill="none"/>
+    <path d="M 45 30 Q 55 25 65 30" stroke="#8b4513" stroke-width="2" fill="none"/>
+    <path d="M 45 35 Q 55 30 65 35" stroke="#8b4513" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Stars scattered -->
+  <g fill="#ff8c00">
+    <polygon points="150,80 155,95 170,95 158,105 163,120 150,110 137,120 142,105 130,95 145,95" opacity="0.8"/>
+    <polygon points="600,120 605,135 620,135 608,145 613,160 600,150 587,160 592,145 580,135 595,135" opacity="0.6"/>
+    <polygon points="200,200 205,215 220,215 208,225 213,240 200,230 187,240 192,225 180,215 195,215" opacity="0.7"/>
+    <polygon points="550,250 555,265 570,265 558,275 563,290 550,280 537,290 542,275 530,265 545,265" opacity="0.5"/>
+    <polygon points="100,150 105,165 120,165 108,175 113,190 100,180 87,190 92,175 80,165 95,165" opacity="0.6"/>
+  </g>
+  
+  <!-- Main text -->
+  <!-- SALE -->
+  <text x="200" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ff4500">SALE</text>
+  
+  <!-- SÁCH -->
+  <text x="200" y="160" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ff4500">SÁCH</text>
+  
+  <!-- ƯU ĐÃI ĐẾN -->
+  <text x="450" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#2c3e50">ƯU ĐÃI ĐẾN</text>
+  
+  <!-- TỐI ĐA circle -->
+  <circle cx="580" cy="100" r="25" fill="#e74c3c"/>
+  <text x="580" y="108" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">TỐI ĐA</text>
+  
+  <!-- 50% -->
+  <text x="450" y="180" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ff8c00">50%</text>
+</svg>

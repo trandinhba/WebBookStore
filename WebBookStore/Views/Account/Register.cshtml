@@ -1,38 +1,435 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var title = "Register";
+    ViewBag.Title = "Đăng ký";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h4 class="mb-3">Register</h4>
-                    @using (Html.BeginForm("Register", "Account", FormMethod.Post))
-                    {
-                        @Html.AntiForgeryToken()
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input name="Email" class="form-control" type="email" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input name="PhoneNumber" class="form-control" type="tel" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input name="Password" class="form-control" type="password" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Confirm Password</label>
-                            <input name="ConfirmPassword" class="form-control" type="password" required />
-                        </div>
-                        <div class="text-muted small mb-2">By registering, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of Sach50</div>
-                        <button type="submit" class="btn btn-primary w-100">Register</button>
-                    }
-                </div>
-            </div>
+@section Styles {
+    <style>
+        .register-container {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+        }
+
+        .register-form {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .register-header {
+            margin-bottom: 30px;
+        }
+
+        .register-title {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .register-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2a2a3e;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.3s;
+        }
+
+        .close-button:hover {
+            background: #3a3a4e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #2a2a3e;
+            border: 1px solid #3a3a4e;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: #2d2d3e;
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 18px;
+        }
+
+        .password-hint {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 6px;
+            margin-left: 4px;
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 14px;
+            background: #10b981;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 24px;
+        }
+
+        .register-button:hover {
+            background: #0ea86d;
+        }
+
+        .register-button:disabled {
+            background: #3a3a4e;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #3a3a4e;
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .social-button {
+            flex: 1;
+            padding: 12px;
+            background: #2a2a3e;
+            border: 1px solid #3a3a4e;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .social-button:hover {
+            background: #3a3a4e;
+            border-color: #4a4a5e;
+        }
+
+        .social-icon {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .terms-text {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .terms-link {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-link:hover {
+            text-decoration: underline;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .login-link-text {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link-text:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 6px;
+            margin-left: 4px;
+        }
+
+        @media (max-width: 576px) {
+            .register-form {
+                padding: 30px 20px;
+            }
+
+            .register-title {
+                font-size: 24px;
+            }
+
+            .social-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="register-container">
+    <form id="registerForm" class="register-form" onsubmit="return handleSubmit(event)">
+        <button type="button" class="close-button" onclick="closeRegister()">×</button>
+        
+        <div class="register-header">
+            <h1 class="register-title">Đăng ký tài khoản</h1>
+            <p class="register-subtitle">Đăng ký để mua và theo dõi quá trình đọc sách</p>
         </div>
-    </div>
+
+        <div class="form-group">
+            <input type="tel" name="PhoneNumber" class="form-input" placeholder="Số điện thoại" required />
+            <div id="phoneError" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <div class="input-wrapper">
+                <input type="password" id="password" name="Password" class="form-input" placeholder="Mật khẩu" required />
+                <span class="eye-icon" onclick="togglePassword('password', 'eyeIcon1')">
+                    <i class="bi bi-eye-slash" id="eyeIcon1"></i>
+                </span>
+            </div>
+            <div class="password-hint">Mật khẩu bao gồm ít nhất 6 ký tự</div>
+            <div id="passwordError" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <div class="input-wrapper">
+                <input type="password" id="confirmPassword" name="ConfirmPassword" class="form-input" placeholder="Nhập lại mật khẩu" required />
+                <span class="eye-icon" onclick="togglePassword('confirmPassword', 'eyeIcon2')">
+                    <i class="bi bi-eye-slash" id="eyeIcon2"></i>
+                </span>
+            </div>
+            <div class="password-hint">Mật khẩu bao gồm ít nhất 6 ký tự</div>
+            <div id="confirmPasswordError" class="error-message"></div>
+        </div>
+
+        <button type="submit" class="register-button">Đăng ký</button>
+
+        <div class="divider">Hoặc đăng ký với</div>
+
+        <div class="social-buttons">
+            <button type="button" class="social-button" onclick="registerWithFacebook()">
+                <span class="social-icon">f</span>
+                <span>Facebook</span>
+            </button>
+            <button type="button" class="social-button" onclick="registerWithGoogle()">
+                <span class="social-icon">G</span>
+                <span>Google</span>
+            </button>
+        </div>
+
+        <div class="terms-text">
+            Bằng việc nhấn "Đăng ký", bạn đã đọc và đồng ý với <a href="#" class="terms-link">điều kiện và điều khoản</a> của Sach50.
+        </div>
+
+        <div class="login-link">
+            Bạn đã có tài khoản? <a href="#" class="login-link-text" onclick="showLogin()">Đăng nhập ngay</a>
+        </div>
+    </form>
 </div>
+
+@section scripts {
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            }
+        }
+
+        function closeRegister() {
+            window.location.href = '@Url.Action("Index", "Home")';
+        }
+
+        function showLogin() {
+            closeRegister();
+            // Trigger login modal if exists
+            setTimeout(() => {
+                $('#loginModal').modal('show');
+            }, 100);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            $('.error-message').text('');
+            
+            const form = e.target;
+            const formData = {
+                FullName: form.PhoneNumber.value, // Using phone as default name
+                Email: form.PhoneNumber.value + '@sach50.com',
+                PhoneNumber: form.PhoneNumber.value,
+                Password: form.Password.value,
+                ConfirmPassword: form.ConfirmPassword.value
+            };
+
+            // Validation
+            if (form.Password.value.length < 6) {
+                $('#passwordError').text('Mật khẩu phải có ít nhất 6 ký tự');
+                return false;
+            }
+
+            if (form.Password.value !== form.ConfirmPassword.value) {
+                $('#confirmPasswordError').text('Mật khẩu xác nhận không khớp');
+                return false;
+            }
+
+            // Submit via AJAX
+            $.ajax({
+                url: '@Url.Action("Register", "Account")',
+                type: 'POST',
+                data: formData,
+                success: function(data) {
+                    if (data.ok) {
+                        alert('Đăng ký thành công! Vui lòng đăng nhập.');
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    } else {
+                        if (data.errors && data.errors.length > 0) {
+                            data.errors.forEach(function(error) {
+                                if (error.includes('Email') || error.includes('email')) {
+                                    $('#phoneError').text(error);
+                                } else if (error.includes('Password') || error.includes('Mật khẩu')) {
+                                    $('#passwordError').text(error);
+                                }
+                            });
+                        }
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                }
+            });
+
+            return false;
+        }
+
+        function registerWithFacebook() {
+            alert('Chức năng đăng ký Facebook đang được phát triển.\nVui lòng sử dụng đăng ký thông thường.');
+            
+            // For now, create a demo registration
+            // In production, integrate with Facebook SDK
+            $.ajax({
+                url: '@Url.Action("RegisterWithFacebook", "Account")',
+                type: 'POST',
+                data: { accessToken: 'demo_token' },
+                success: function(data) {
+                    if (data.ok) {
+                        alert(data.message);
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra');
+                }
+            });
+        }
+
+        function registerWithGoogle() {
+            alert('Chức năng đăng ký Google đang được phát triển.\nVui lòng sử dụng đăng ký thông thường.');
+            
+            // For now, create a demo registration
+            // In production, integrate with Google Sign-In
+            $.ajax({
+                url: '@Url.Action("RegisterWithGoogle", "Account")',
+                type: 'POST',
+                data: { idToken: 'demo_token' },
+                success: function(data) {
+                    if (data.ok) {
+                        alert(data.message);
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra');
+                }
+            });
+        }
+    </script>
+}

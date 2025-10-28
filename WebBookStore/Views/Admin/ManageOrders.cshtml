@@ -1,0 +1,334 @@
+@model IEnumerable<WebBookStore.Models.Order>
+
+@{
+    ViewBag.Title = "Quản Lý Đơn Hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">@ViewBag.Title</h1>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
+<div class="order-list-section">
+    <div class="section-header">
+        <h2 class="section-title">Danh Sách Đơn Hàng</h2>
+        <div class="section-actions">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter"></i> Lọc theo trạng thái
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('all')">Tất cả</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('Pending')">Chờ xử lý</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('Processing')">Đang xử lý</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('Shipped')">Đã giao</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('Delivered')">Hoàn thành</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterOrders('Cancelled')">Đã hủy</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table books-table">
+            <thead>
+                <tr>
+                    <th>Mã ĐH</th>
+                    <th>Khách Hàng</th>
+                    <th>Ngày Đặt</th>
+                    <th>Tổng Tiền</th>
+                    <th>Trạng Thái</th>
+                    <th>Địa Chỉ Giao</th>
+                    <th>Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var order in Model)
+                    {
+                        <tr class="order-row" data-status="@order.Status.ToString()">
+                            <td class="order-id">#@order.Id</td>
+                            <td>
+                                <div>
+                                    <strong>Khách hàng #@order.UserId</strong><br>
+                                    <small class="text-muted">ID: @order.UserId</small>
+                                </div>
+                            </td>
+                            <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="order-total">@order.Total.ToString("N0") ₫</td>
+                            <td>
+                                <span class="status-badge status-@order.Status.ToString().ToLower()">
+                                    @switch (order.Status)
+                                    {
+                                        case WebBookStore.Models.OrderStatus.Pending:
+                                            <text>Chờ xử lý</text>
+                                            break;
+                                        case WebBookStore.Models.OrderStatus.Processing:
+                                            <text>Đang xử lý</text>
+                                            break;
+                                        case WebBookStore.Models.OrderStatus.Shipped:
+                                            <text>Đã giao</text>
+                                            break;
+                                        case WebBookStore.Models.OrderStatus.Delivered:
+                                            <text>Hoàn thành</text>
+                                            break;
+                                        case WebBookStore.Models.OrderStatus.Cancelled:
+                                            <text>Đã hủy</text>
+                                            break;
+                                    }
+                                </span>
+                            </td>
+                            <td class="order-address">@order.ShippingAddress</td>
+                            <td class="order-actions">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="@Url.Action("OrderDetails", "Admin", new { id = order.Id })">
+                                            <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Processing')">
+                                            <i class="fas fa-play me-2"></i>Bắt đầu xử lý
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Shipped')">
+                                            <i class="fas fa-truck me-2"></i>Đã giao hàng
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Delivered')">
+                                            <i class="fas fa-check me-2"></i>Hoàn thành
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Cancelled')">
+                                            <i class="fas fa-times me-2"></i>Hủy đơn hàng
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                            Chưa có đơn hàng nào
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container">
+        <div class="pagination-info">
+            @{
+                var orderCount = Model != null ? Model.Count() : 0;
+            }
+            <span>Tổng cộng: <strong>@orderCount</strong> đơn hàng</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-list-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .section-actions .dropdown-menu {
+        min-width: 180px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 8px;
+    }
+
+    .section-actions .dropdown-item {
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #2c3e50;
+        transition: all 0.2s ease;
+    }
+
+    .section-actions .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #3498db;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .books-table {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .books-table th {
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        font-weight: 600;
+        color: #2c3e50;
+        padding: 15px 12px;
+    }
+
+    .books-table td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .books-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .order-id {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .order-total {
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    .order-address {
+        max-width: 200px;
+        color: #6c757d;
+        font-size: 13px;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-processing {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-shipped {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-delivered {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .order-actions .dropdown-toggle {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+    }
+
+    .order-actions .dropdown-toggle:hover {
+        color: #2c3e50;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 30px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .order-row.hidden {
+        display: none;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function filterOrders(status) {
+            const rows = document.querySelectorAll('.order-row');
+            
+            rows.forEach(row => {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateOrderStatus(orderId, status) {
+            if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này?')) {
+                $.ajax({
+                    url: '@Url.Action("UpdateOrderStatus", "Admin")',
+                    type: 'POST',
+                    data: {
+                        orderId: orderId,
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng');
+                    }
+                });
+            }
+        }
+    </script>
+}

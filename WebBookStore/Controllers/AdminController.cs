@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using System.Data.Entity;
 using WebBookStore.Data;
 using WebBookStore.Models;
 using WebBookStore.Filters;
@@ -563,19 +564,326 @@ namespace WebBookStore.Controllers
 
 
         /// <summary>
+        /// Quản lý đơn hàng
+        /// </summary>
+        public ActionResult ManageOrders()
+        {
+            try
+            {
+                var orders = _context.Orders
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ToList();
+
+                ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
+                ViewBag.Title = "Quản Lý Đơn Hàng";
+                return View(orders);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Có lỗi xảy ra khi tải danh sách đơn hàng: " + ex.Message;
+                return View();
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật trạng thái đơn hàng
+        /// </summary>
+        [HttpPost]
+        public ActionResult UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                var order = _context.Orders.Find(orderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                if (Enum.TryParse<OrderStatus>(status, true, out OrderStatus newStatus))
+                {
+                    order.Status = newStatus;
+                    order.UpdatedAt = DateTime.Now;
+                    _context.SaveChanges();
+
+                    return Json(new { success = true, message = "Cập nhật trạng thái đơn hàng thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Trạng thái không hợp lệ" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Xem chi tiết đơn hàng
+        /// </summary>
+        public ActionResult OrderDetails(int id)
+        {
+            try
+            {
+                var order = _context.Orders
+                    .FirstOrDefault(o => o.Id == id);
+
+                if (order == null)
+                {
+                    return HttpNotFound("Không tìm thấy đơn hàng");
+                }
+
+                ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Có lỗi xảy ra: " + ex.Message;
+                return View();
+            }
+        }
+
+        /// <summary>
+        /// Quản lý kho
+        /// </summary>
+        public ActionResult ManageInventory()
+        {
+            try
+            {
+                var books = _context.Books.ToList();
+                
+                // Sort manually to avoid LINQ expression issues
+                books = books.OrderBy(b => b.StockQuantity).ToList();
+                books = books.OrderByDescending(b => b.CreatedDate).ToList();
+
+                ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
+                ViewBag.Title = "Quản Lý Kho";
+                return View("ManageInventory", books);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Có lỗi xảy ra khi tải danh sách kho: " + ex.Message;
+                return View();
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật số lượng tồn kho
+        /// </summary>
+        [HttpPost]
+        public ActionResult UpdateStock(int bookId, int quantity)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateStock called: bookId={bookId}, quantity={quantity}");
+                
+                var book = _context.Books.Find(bookId);
+                if (book == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sách" });
+                }
+
+                book.StockQuantity = quantity;
+                _context.SaveChanges();
+
+                System.Diagnostics.Debug.WriteLine($"UpdateStock success: bookId={bookId}");
+                return Json(new { success = true, message = "Cập nhật số lượng tồn kho thành công!" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateStock error: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật trạng thái sách (Active/Inactive)
+        /// </summary>
+        [HttpPost]
+        public ActionResult UpdateBookStatus(int bookId, bool isActive)
+        {
+            try
+            {
+                var book = _context.Books.Find(bookId);
+                if (book == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sách" });
+                }
+
+                book.IsActive = isActive;
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Cập nhật trạng thái sách thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
         /// System Settings
         /// </summary>
         public ActionResult SystemSettings()
         {
             try
             {
+                var stats = new
+                {
+                    TotalBooks = _context.Books.Count(),
+                    TotalUsers = _context.Users.Count(),
+                    TotalOrders = _context.Orders.Count(),
+                    TotalCategories = _context.Categories.Count(),
+                    LowStockBooks = _context.Books.Count(b => b.StockQuantity < 10),
+                    PendingOrders = _context.Orders.Count(o => o.Status == OrderStatus.Pending)
+                };
+
+                ViewBag.Stats = stats;
                 ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
+                ViewBag.Title = "Cài Đặt Hệ Thống";
                 return View();
             }
             catch (Exception ex)
             {
                 ViewBag.Error = "Có lỗi xảy ra: " + ex.Message;
                 return View();
+            }
+        }
+
+        /// <summary>
+        /// Upload ảnh cho sách
+        /// </summary>
+        [HttpPost]
+        public ActionResult UploadBookImage()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("UploadBookImage called");
+                
+                if (Request.Files.Count > 0)
+                {
+                    var file = Request.Files[0];
+                    System.Diagnostics.Debug.WriteLine($"File received: {file?.FileName}, Size: {file?.ContentLength}");
+                    
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        // Validate file type
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                        var fileExtension = System.IO.Path.GetExtension(file.FileName).ToLower();
+                        
+                        System.Diagnostics.Debug.WriteLine($"File extension: {fileExtension}");
+                        
+                        if (!allowedExtensions.Contains(fileExtension))
+                        {
+                            return Json(new { success = false, message = "Chỉ chấp nhận file: JPG, JPEG, PNG, GIF" });
+                        }
+
+                        // Validate file size (max 5MB)
+                        if (file.ContentLength > 5 * 1024 * 1024)
+                        {
+                            return Json(new { success = false, message = "File không được vượt quá 5MB" });
+                        }
+
+                        // Get bookId from request
+                        int bookId = 0;
+                        if (!int.TryParse(Request.Form["bookId"], out bookId))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Could not parse bookId from form");
+                            return Json(new { success = false, message = "Không tìm thấy ID sách" });
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"BookId: {bookId}");
+
+                        // Create directory if not exists
+                        var uploadPath = "/Content/uploads/books/";
+                        var physicalPath = Server.MapPath(uploadPath);
+                        
+                        System.Diagnostics.Debug.WriteLine($"Physical path: {physicalPath}");
+                        
+                        if (!System.IO.Directory.Exists(physicalPath))
+                        {
+                            System.IO.Directory.CreateDirectory(physicalPath);
+                            System.Diagnostics.Debug.WriteLine("Created directory");
+                        }
+
+                        // Generate unique filename
+                        var fileName = $"book_{bookId}_{DateTime.Now.Ticks}{fileExtension}";
+                        var filePath = System.IO.Path.Combine(physicalPath, fileName);
+                        
+                        System.Diagnostics.Debug.WriteLine($"Saving to: {filePath}");
+                        
+                        // Save file
+                        file.SaveAs(filePath);
+
+                        // Update book with image path
+                        var book = _context.Books.Find(bookId);
+                        if (book != null)
+                        {
+                            // Delete old image if exists
+                            if (!string.IsNullOrEmpty(book.ImageUrl) && System.IO.File.Exists(Server.MapPath(book.ImageUrl)))
+                            {
+                                System.IO.File.Delete(Server.MapPath(book.ImageUrl));
+                            }
+
+                            book.ImageUrl = uploadPath + fileName;
+                            _context.SaveChanges();
+
+                            System.Diagnostics.Debug.WriteLine($"Image saved successfully: {book.ImageUrl}");
+                            
+                            return Json(new { 
+                                success = true, 
+                                message = "Upload ảnh thành công!", 
+                                imageUrl = book.ImageUrl 
+                            });
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Không tìm thấy sách với ID: " + bookId });
+                        }
+                    }
+                }
+
+                return Json(new { success = false, message = "Không có file được chọn" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Upload error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Xóa ảnh của sách
+        /// </summary>
+        [HttpPost]
+        public ActionResult DeleteBookImage(int bookId)
+        {
+            try
+            {
+                var book = _context.Books.Find(bookId);
+                if (book == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sách" });
+                }
+
+                if (!string.IsNullOrEmpty(book.ImageUrl))
+                {
+                    var filePath = Server.MapPath(book.ImageUrl);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
+                book.ImageUrl = null;
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Xóa ảnh thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
 

@@ -839,8 +839,8 @@
                     <li><a href="@Url.Action("ManageBooks", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageBooks" ? "class=active" : "")><i class="fas fa-book"></i> Quản Lý Sách</a></li>
                     <li><a href="@Url.Action("ManageUsers", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageUsers" ? "class=active" : "")><i class="fas fa-users"></i> Quản Lý Nhân Viên</a></li>
                     <li><a href="@Url.Action("ManageCustomers", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageCustomers" ? "class=active" : "")><i class="fas fa-user"></i> Quản Lý Khách Hàng</a></li>
-                    <li><a href="#" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageOrders" ? "class=active" : "")><i class="fas fa-file-invoice"></i> Quản Lý Hóa Đơn</a></li>
-                    <li><a href="#" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageInventory" ? "class=active" : "")><i class="fas fa-box"></i> Quản Lý Kho</a></li>
+                    <li><a href="@Url.Action("ManageOrders", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageOrders" ? "class=active" : "")><i class="fas fa-file-invoice"></i> Quản Lý Hóa Đơn</a></li>
+                    <li><a href="@Url.Action("ManageInventory", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "ManageInventory" ? "class=active" : "")><i class="fas fa-box"></i> Quản Lý Kho</a></li>
                     <li><a href="@Url.Action("SystemSettings", "Admin")" @(ViewContext.RouteData.Values["Action"].ToString() == "SystemSettings" ? "class=active" : "")><i class="fas fa-cog"></i> Cài Đặt</a></li>
                 </ul>
             </nav>

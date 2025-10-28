@@ -51,6 +51,7 @@
         <table class="table table-hover books-table">
             <thead>
                 <tr>
+                    <th>Ảnh</th>
                     <th>Mã Sách</th>
                     <th>Tên Sách</th>
                     <th>Nhà Xuất Bản</th>
@@ -66,6 +67,22 @@
                     foreach (var book in Model)
                     {
                         <tr data-book-id="@book.BookId">
+                            <td class="book-image-cell">
+                                @if (!string.IsNullOrEmpty(book.ImageUrl))
+                                {
+                                    <img src="@book.ImageUrl" alt="@book.Title" class="book-thumbnail" onerror="this.src='/Content/images/no-image.svg'" />
+                                }
+                                else
+                                {
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                        <span>Chưa có ảnh</span>
+                                    </div>
+                                }
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showUploadModal(@book.BookId)">
+                                    <i class="fas fa-upload me-1"></i>Upload
+                                </button>
+                            </td>
                             <td class="book-id">@book.BookId</td>
                             <td class="book-title">@book.Title</td>
                             <td class="book-publisher">@book.Publisher</td>
@@ -86,6 +103,11 @@
                                         <li>
                                             <button class="dropdown-item edit-book-btn" data-book-id="@book.BookId">
                                                 <i class="fas fa-edit me-2"></i>Sửa
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item upload-image-btn" data-book-id="@book.BookId" onclick="showUploadModal(@book.BookId)">
+                                                <i class="fas fa-image me-2"></i>Upload Ảnh
                                             </button>
                                         </li>
                                         <li>
@@ -563,5 +585,128 @@
                     });
             });
         });
+
+        // Show upload modal
+        window.showUploadModal = function(bookId) {
+            $('#uploadBookId').val(bookId);
+            $('#uploadImageModal').modal('show');
+        };
+
+        // Upload image
+        $('#uploadImageBtn').click(function() {
+            var bookId = $('#uploadBookId').val();
+            var fileInput = $('#imageFileInput')[0];
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Vui lòng chọn ảnh!');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('bookId', bookId);
+
+            console.log('Uploading image for book:', bookId);
+            console.log('File:', fileInput.files[0].name, 'Size:', fileInput.files[0].size);
+
+            $.ajax({
+                url: '@Url.Action("UploadBookImage", "Admin")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Upload response:', response);
+                    if (response.success) {
+                        alert(response.message);
+                        $('#uploadImageModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Lỗi: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Upload error:', error);
+                    console.log('Response text:', xhr.responseText);
+                    alert('Có lỗi xảy ra khi upload ảnh: ' + error);
+                }
+            });
+        });
+
+        // Preview image before upload
+        $('#imageFileInput').change(function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#imagePreview').attr('src', e.target.result).show();
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
     </script>
 }
+
+<!-- Upload Image Modal -->
+<div class="modal fade" id="uploadImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Ảnh Sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="uploadBookId" />
+                <div class="mb-3">
+                    <label for="imageFileInput" class="form-label">Chọn ảnh (JPG, PNG, GIF - Max 5MB)</label>
+                    <input type="file" class="form-control" id="imageFileInput" accept="image/*">
+                    <small class="text-muted">Chỉ chấp nhận file: JPG, JPEG, PNG, GIF - Dung lượng tối đa: 5MB</small>
+                </div>
+                <div class="text-center">
+                    <img id="imagePreview" src="#" alt="Preview" style="max-width: 100%; max-height: 300px; display: none;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="uploadImageBtn">
+                    <i class="fas fa-upload me-2"></i>Upload Ảnh
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .book-image-cell {
+        width: 150px;
+        text-align: center;
+    }
+
+    .book-thumbnail {
+        width: 80px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .no-image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 80px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    .no-image i {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .book-image-cell button {
+        width: 100%;
+    }
+</style>

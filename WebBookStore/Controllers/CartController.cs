@@ -1,7 +1,11 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
 using WebBookStore.Services;
 using WebBookStore.Data;
 using WebBookStore.Repositories;
+using WebBookStore.ViewModels;
+using WebBookStore.Models;
 
 namespace WebBookStore.Controllers
 {
@@ -29,7 +33,37 @@ namespace WebBookStore.Controllers
             var userId = GetCurrentUserId();
             var cart = _cartService.GetUserCart(userId);
 
-            return View(cart);
+            var viewModel = new CartViewModel();
+            
+            if (cart != null && cart.CartItems != null)
+            {
+                foreach (var item in cart.CartItems)
+                {
+                    var book = _bookService.GetBookById(item.BookId);
+                    if (book != null)
+                    {
+                        var unitPrice = book.DiscountPrice ?? book.Price;
+                        var cartItem = new CartItemViewModel
+                        {
+                            CartItemId = item.CartItemId,
+                            CartId = item.CartId,
+                            BookId = item.BookId,
+                            Book = book,
+                            Quantity = item.Quantity,
+                            UnitPrice = unitPrice,
+                            TotalPrice = unitPrice * item.Quantity
+                        };
+                        
+                        viewModel.Items.Add(cartItem);
+                        viewModel.SubTotal += cartItem.TotalPrice;
+                    }
+                }
+            }
+
+            viewModel.TotalAmount = viewModel.SubTotal; // No shipping fee for now
+            viewModel.TotalItems = viewModel.Items.Sum(i => i.Quantity);
+
+            return View(viewModel);
         }
 
         // POST: Cart/AddToCart

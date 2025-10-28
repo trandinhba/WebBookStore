@@ -139,7 +139,7 @@
     $(document).ready(function() {
         // Login form submission
         $('#loginForm').on('submit', function(e) {
-            e.preventDefault();
+                e.preventDefault();
             console.log('[DEBUG] Login form submit triggered');
             
             var form = $(this);
@@ -219,7 +219,7 @@
         
         // Register form submission
         $('#registerForm').on('submit', function(e) {
-            e.preventDefault();
+                e.preventDefault();
             console.log('[DEBUG] Register form submit triggered');
             
             var form = $(this);
@@ -302,5 +302,43 @@
         window.showComingSoon = function(provider) {
             alert('Đăng nhập với ' + provider + ' đang được phát triển. Vui lòng sử dụng đăng nhập thông thường.');
         };
+        
+        // Toggle password visibility
+        $('#togglePassword').on('click', function() {
+            var passwordInput = $('#Password');
+            var icon = $(this).find('i');
+            
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+        
+        // Toggle confirm password visibility
+        $('#toggleConfirmPassword').on('click', function() {
+            var passwordInput = $('#ConfirmPassword');
+            var icon = $(this).find('i');
+            
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+        
+        // Auto-fill FullName and Email from PhoneNumber (for backend compatibility)
+        $('#PhoneNumber').on('blur', function() {
+            var phoneNumber = $(this).val();
+            if (phoneNumber) {
+                $('#FullName').val('User_' + phoneNumber);
+                var emailSuffix = String.fromCharCode(64) + 'email.com';
+                $('#Email').val(phoneNumber + emailSuffix);
+            }
+        });
     });
 </script>

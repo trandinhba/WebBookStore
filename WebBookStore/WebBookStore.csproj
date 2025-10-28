@@ -217,6 +217,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="ViewModels\AdminDashboardViewModel.cs" />
     <Compile Include="ViewModels\BookDetailViewModel.cs" />
+    <Compile Include="ViewModels\CartViewModel.cs" />
     <Compile Include="ViewModels\CheckoutViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
@@ -322,6 +323,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Views\ApplicationDbContext\" />
+    <Folder Include="Views\CartItemViewModel\" />
     <Folder Include="Views\Product\" />
   </ItemGroup>
   <ItemGroup>

@@ -36,7 +36,14 @@
                 <div class="col-md-3 col-sm-6">
                     <div class="card h-100 shadow-sm border-0">
                         <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
-                            <img src="@book.ImageUrl" alt="@book.Title" class="card-img-top img-fluid" style="height: 280px; object-fit: cover;" />
+                            @if (!string.IsNullOrEmpty(book.ImageUrl))
+                            {
+                                <img src="@book.ImageUrl" alt="@book.Title" class="card-img-top img-fluid" style="height: 280px; object-fit: cover;" onerror="this.src='/Content/images/no-image.svg'" />
+                            }
+                            else
+                            {
+                                <img src="/Content/images/no-image.svg" alt="@book.Title" class="card-img-top img-fluid" style="height: 280px; object-fit: cover;" />
+                            }
                             <div class="card-body">
                                 <h6 class="card-title fw-semibold text-truncate">@book.Title</h6>
                                 <p class="text-muted small mb-1">@book.Author</p>

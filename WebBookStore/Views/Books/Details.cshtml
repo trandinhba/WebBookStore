@@ -19,7 +19,14 @@
                 <section class="productdetailpage-frame-wrapper">
                     <div class="sao-pro7-2-parent">
                         <div class="position-relative">
-                            <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="@Url.Content(Model.ImageUrl)" />
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="@Url.Content(Model.ImageUrl)" onerror="this.src='/Content/images/no-image.svg'" />
+                            }
+                            else
+                            {
+                                <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="/Content/images/no-image.svg" />
+                            }
                             @if (Model.StockQuantity <= 0)
                             {
                                 <div class="position-absolute top-0 start-0 badge bg-danger m-2 fs-6">Hết hàng</div>
