@@ -1,7 +1,159 @@
-﻿
-@{
-    ViewBag.Title = "Dashboard";
+﻿@{
+    ViewBag.Title = "Trang Quản Lý";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h2>Dashboard</h2>
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">@(ViewBag.Stats != null ? ViewBag.Stats.Unresolved : 60)</div>
+        <div class="stat-label">Chưa giải quyết</div>
+    </div>
+    <div class="stat-card active">
+        <div class="stat-number">@(ViewBag.Stats != null ? ViewBag.Stats.Overdue : 16)</div>
+        <div class="stat-label">Quá hạn</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">@(ViewBag.Stats != null ? ViewBag.Stats.InProgress : 43)</div>
+        <div class="stat-label">Đang làm</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">@(ViewBag.Stats != null ? ViewBag.Stats.PendingApproval : 64)</div>
+        <div class="stat-label">Chờ duyệt</div>
+    </div>
+</div>
 
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Left Panel -->
+    <div class="content-panel">
+        <div class="panel-header">
+            <h3>Yêu cầu chưa giải quyết</h3>
+            <a href="#" class="view-details">Xem chi tiết</a>
+        </div>
+        <div class="panel-content">
+            <div class="request-item">
+                <span class="request-label">Chờ giải quyết</span>
+                        <span class="request-count">@(ViewBag.Requests != null ? ViewBag.Requests.PendingResolution : 4238)</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Báo lỗi từ khách hàng</span>
+                <span class="request-count">@(ViewBag.Requests != null ? ViewBag.Requests.CustomerBugReports : 1005)</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Chờ fix từ dev</span>
+                <span class="request-count">@(ViewBag.Requests != null ? ViewBag.Requests.WaitingForDevFix : 914)</span>
+            </div>
+            <div class="request-item">
+                <span class="request-label">Chờ duyệt</span>
+                <span class="request-count">@(ViewBag.Requests != null ? ViewBag.Requests.PendingApproval : 281)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="content-panel">
+        <div class="panel-header">
+            <h3>Công việc</h3>
+            <a href="#" class="view-all">Xem tất cả</a>
+        </div>
+        <div class="panel-content">
+            <div class="task-section">
+                <h4>Hôm nay</h4>
+                <div class="task-input">
+                    <input type="text" placeholder="Tạo công việc mới" class="task-input-field">
+                    <button class="add-task-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                        @if (ViewBag.TodayTasks != null)
+                        {
+                            foreach (var task in ViewBag.TodayTasks)
+                            {
+                                <div class="task-item @(task.Completed ? "completed" : "")">
+                                    @if (task.Type == "radio")
+                                    {
+                                        <input type="radio" id="task@(task.Id)" name="task" @(task.Completed ? "checked" : "")>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" id="task@(task.Id)" @(task.Completed ? "checked" : "")>
+                                    }
+                                    <label for="task@(task.Id)">@task.Text</label>
+                                    @if (!string.IsNullOrEmpty(task.Tag))
+                                    {
+                                        <span class="default-tag">@task.Tag</span>
+                                    }
+                                </div>
+                            }
+                        }
+                else
+                {
+                    <div class="task-item">
+                        <input type="radio" id="task1" name="task">
+                        <label for="task1">Duyệt yêu cầu sửa lỗi</label>
+                    </div>
+                    <div class="task-item">
+                        <input type="radio" id="task2" name="task">
+                        <label for="task2">Fix lỗi</label>
+                    </div>
+                    <div class="task-item completed">
+                        <input type="checkbox" id="task3" checked>
+                        <label for="task3">Giải quyết lỗi giao diện</label>
+                        <span class="default-tag">DEFAULT</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add task functionality
+        document.querySelector('.add-task-btn').addEventListener('click', function() {
+            const input = document.querySelector('.task-input-field');
+            const taskText = input.value.trim();
+            
+            if (taskText) {
+                // Create new task item
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <input type="radio" id="task${Date.now()}" name="task">
+                    <label for="task${Date.now()}">${taskText}</label>
+                `;
+                
+                // Insert before the last task item
+                const taskSection = document.querySelector('.task-section');
+                const lastTask = taskSection.querySelector('.task-item:last-child');
+                taskSection.insertBefore(taskItem, lastTask);
+                
+                // Clear input
+                input.value = '';
+            }
+        });
+
+        // Task completion functionality
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'radio' || e.target.type === 'checkbox') {
+                const taskItem = e.target.closest('.task-item');
+                if (e.target.checked) {
+                    taskItem.classList.add('completed');
+                } else {
+                    taskItem.classList.remove('completed');
+                }
+            }
+        });
+
+        // Card hover effects
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all cards
+                document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+                // Add active class to clicked card
+                this.classList.add('active');
+            });
+        });
+    </script>
+}

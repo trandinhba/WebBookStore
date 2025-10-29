@@ -1,7 +1,510 @@
-﻿
+﻿@model WebBookStore.Models.Order
+
 @{
-    ViewBag.Title = "Checkout";
+    ViewBag.Title = "Đặt hàng và thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cart = ViewBag.Cart as WebBookStore.Models.Cart;
 }
 
-<h2>Checkout</h2>
+<div class="container my-4">
+    <!-- Login Notice -->
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Bạn đã là thành viên? <a href="@Url.Action("Login", "Account")" class="alert-link">Đăng nhập ngay</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
+    <div class="row">
+        <!-- Left Column - Order Form -->
+        <div class="col-lg-8">
+            @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate", id = "checkoutForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Shipping Address -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-geo-alt me-2"></i>ĐỊA CHỈ GIAO HÀNG</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="FullName" class="form-label">Họ và tên người nhận *</label>
+                                @Html.TextBoxFor(m => m.ShippingAddress, new { @class = "form-control", placeholder = "Nhập họ và tên người nhận", required = "required" })
+                                @Html.ValidationMessageFor(m => m.ShippingAddress, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" placeholder="Nhập email" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="PhoneNumber" class="form-label">Số điện thoại *</label>
+                                <input type="tel" class="form-control" placeholder="Ví dụ: 0979123xxx (10 chữ số)" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Country" class="form-label">Quốc gia</label>
+                                <select class="form-select">
+                                    <option selected>Việt Nam</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="City" class="form-label">Tỉnh/Thành phố *</label>
+                                <select class="form-select" id="citySelect" required>
+                                    <option value="">Chọn tỉnh/thành phố</option>
+                                    <option value="hanoi">Hà Nội</option>
+                                    <option value="hcm">TP. Hồ Chí Minh</option>
+                                    <option value="danang">Đà Nẵng</option>
+                                    <option value="haiphong">Hải Phòng</option>
+                                    <option value="cantho">Cần Thơ</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="District" class="form-label">Quận/Huyện *</label>
+                                <select class="form-select" id="districtSelect" required disabled>
+                                    <option value="">Chọn quận/huyện</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="Ward" class="form-label">Phường/Xã *</label>
+                                <select class="form-select" id="wardSelect" required disabled>
+                                    <option value="">Chọn phường/xã</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Address" class="form-label">Địa chỉ nhận hàng *</label>
+                            <textarea class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Method -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-truck me-2"></i>PHƯƠNG THỨC VẬN CHUYỂN</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="shippingMethod" id="standardShipping" value="standard" checked>
+                            <label class="form-check-label" for="standardShipping">
+                                <strong>Giao hàng tiêu chuẩn: 22.000 ₫</strong>
+                                <br>
+                                <small class="text-muted">Dự kiến giao hàng: Thứ sáu 23/12</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-credit-card me-2"></i>PHƯƠNG THỨC THANH TOÁN</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
+                                <label class="form-check-label" for="cod">
+                                    <strong>Thanh toán bằng tiền mặt khi nhận hàng</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="vnpay">
+                                <label class="form-check-label" for="vnpay">
+                                    <img src="~/Content/images/payment/vnpay.png" alt="VNPay" style="height: 24px;" class="me-2">
+                                    VNPay
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promotion Code -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-gift me-2"></i>MÃ KHUYẾN MÃI/MÃ QUÀ TẶNG</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <input type="text" class="form-control" placeholder="Nhập mã khuyến mãi/quà tặng" id="promoCode">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button type="button" class="btn btn-primary w-100" onclick="applyPromoCode()">Áp dụng</button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <a href="#" class="text-primary">Chọn mã khuyến mãi</a>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Có thể áp dụng đồng thời nhiều mã
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Other Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-info-circle me-2"></i>THÔNG TIN KHÁC</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="hasNote">
+                            <label class="form-check-label" for="hasNote">
+                                Ghi chú
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="issueVAT">
+                            <label class="form-check-label" for="issueVAT">
+                                Xuất hóa đơn GTGT
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <small class="text-muted">
+                            Bằng việc tiến hành đặt mua, khách hàng đồng ý với các Điều Kiện Giao Dịch Chung được ban hành bởi Sách50: 
+                            <a href="#" class="text-primary">Điều khoản sử dụng</a> | 
+                            <a href="#" class="text-primary">Chính sách bảo mật thanh toán</a> | 
+                            <a href="#" class="text-primary">Chính sách bảo mật thông tin cá nhân</a> | 
+                            <a href="#" class="text-primary">Chính sách vận chuyển</a> | 
+                            <a href="#" class="text-primary">Chính sách Đổi trả - hoàn tiền</a>.
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right Column - Order Summary -->
+        <div class="col-lg-4">
+            <!-- Order Review -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-list-check me-2"></i>KIỂM TRA LẠI ĐƠN HÀNG</h4>
+                </div>
+                <div class="card-body">
+                    @if (cart != null && cart.CartItems.Any())
+                    {
+                        foreach (var item in cart.CartItems)
+                        {
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    @if (!string.IsNullOrEmpty(item.Book.ImageUrl))
+                                    {
+                                        <img src="@Url.Content(item.Book.ImageUrl)" alt="@item.Book.Title" style="width: 80px; height: 100px; object-fit: cover;" class="rounded">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 80px; height: 100px;">
+                                            <i class="bi bi-book text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">@item.Book.Title</h6>
+                                    <p class="text-muted small mb-1">@item.Book.Author</p>
+                                    <p class="text-muted small mb-1">@item.Book.FinalPrice.ToString("N0") ₫</p>
+                                    <p class="text-muted small mb-0">Số lượng: @item.Quantity</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <strong>@((item.Book.FinalPrice * item.Quantity).ToString("N0")) ₫</strong>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tóm tắt đơn hàng</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Thành tiền:</span>
+                        <span id="subtotal">@(cart != null ? cart.TotalAmount.ToString("N0") : "0") ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển:</span>
+                        <span id="shippingFee">22.000 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giảm giá:</span>
+                        <span id="discount" class="text-success">0 ₫</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Tổng số tiền (gồm VAT):</strong>
+                        <strong id="totalAmount">@(cart != null ? (cart.TotalAmount + 22000).ToString("N0") : "22.000") ₫</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2 mt-4">
+                <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Quay về đơn hàng
+                </a>
+                <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle me-2"></i>XÁC NHẬN THANH TOÁN
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Address cascade dropdowns
+    var addressData = {
+        'hanoi': {
+            'baidinh': ['Phúc Xá', 'Trúc Bạch', 'Vĩnh Phú', 'Cống Vị', 'Điện Biên', 'Đội Cấn', 'Giảng Võ', 'Kim Mã', 'Liễu Giai', 'Ngọc Hà', 'Ngọc Khánh', 'Quán Thánh', 'Thành Công'],
+            'hoankiem': ['Chương Dương Độ', 'Cửa Đông', 'Cửa Nam', 'Đồng Xuân', 'Hàng Bạc', 'Hàng Bồ', 'Hàng Bông', 'Hàng Buồm', 'Hàng Đào', 'Hàng Gai', 'Hàng Mã', 'Hàng Ngang', 'Hàng Rồng', 'Hàng Trống', 'Lý Thái Tổ', 'Phan Chu Trinh', 'Phúc Tân', 'Tràng Tiền'],
+            'dongda': ['Bạch Đằng', 'Bạch Mai', 'Bùi Thị Xuân', 'Cầu Dền', 'Cầu Gỗ', 'Chợ Đồng Xuân', 'Đồng Nhân', 'Đồng Tâm', 'Hàng Bột', 'Hàng Đậu', 'Hàng Lược', 'Hàng Mã', 'Hàng Nón', 'Hàng Rươi', 'Hàng Vải', 'Khâm Thiên', 'Khương Thượng', 'Láng Hạ', 'Láng Thượng', 'Ngã Tư Sở', 'Ô Chợ Dừa', 'Phương Liên', 'Phương Mai', 'Quang Trung', 'Quốc Tử Giám', 'Thịnh Quang', 'Trung Liệt', 'Trung Phụng', 'Văn Chương', 'Văn Miếu']
+        },
+        'hcm': {
+            'quan1': ['Bến Nghé', 'Bến Thành', 'Cầu Kho', 'Cầu Ông Lãnh', 'Cô Giang', 'Đa Kao', 'Nguyễn Cư Trinh', 'Nguyễn Thái Bình', 'Phạm Ngũ Lão', 'Tân Định'],
+            'quan2': ['An Phú', 'An Khánh', 'Bình An', 'Bình Khánh', 'Bình Trưng Đông', 'Bình Trưng Tây', 'Cát Lái', 'Thạnh Mỹ Lợi', 'Thủ Thiêm'],
+            'quan3': ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10', 'Phường 11', 'Phường 12', 'Phường 13', 'Phường 14'],
+            'quan4': ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10', 'Phường 11', 'Phường 12', 'Phường 13', 'Phường 14', 'Phường 15', 'Phường 16', 'Phường 17', 'Phường 18']
+        },
+        'danang': {
+            'haichau': ['Bình Hiên', 'Bình Thuận', 'Hải Châu I', 'Hải Châu II', 'Hòa Cường Bắc', 'Hòa Cường Nam', 'Hòa Thuận Đông', 'Hòa Thuận Tây', 'Nam Dương', 'Phước Ninh', 'Thạch Thang', 'Thanh Bình', 'Thuận Phước'],
+            'thanhkhe': ['An Khê', 'Chính Gián', 'Hòa Khê', 'Tam Thuận', 'Tân Chính', 'Thạc Gián', 'Thanh Khê Đông', 'Thanh Khê Tây', 'Vĩnh Trung', 'Xuân Hà']
+        },
+        'haiphong': {
+            'hongbang': ['Hạ Lý', 'Hoàng Văn Thụ', 'Hùng Vương', 'Minh Khai', 'Phạm Hồng Thái', 'Quán Toan', 'Sở Dầu', 'Thượng Lý', 'Trại Cau', 'Trại Sơn'],
+            'ngoquyen': ['Cát Dài', 'Đằng Giang', 'Đông Khê', 'Gia Viên', 'Lạc Viên', 'Lê Lợi', 'Lương Khánh Thiện', 'Máy Chai', 'Máy Tơ', 'Vạn Mỹ']
+        },
+        'cantho': {
+            'ninhkieu': ['An Hòa', 'An Khánh', 'An Nghiệp', 'An Phú', 'Cái Khế', 'Hưng Lợi', 'Tân An', 'Thới Bình', 'Xuân Khánh'],
+            'binhthuy': ['An Thới', 'Bình Thủy', 'Bùi Hữu Nghĩa', 'Long Hòa', 'Long Tuyền', 'Thới An Đông', 'Thới An', 'Trà An', 'Trà Nóc']
+        }
+    };
+
+    // City change handler
+    document.getElementById('citySelect').addEventListener('change', function() {
+        var cityId = this.value;
+        var districtSelect = document.getElementById('districtSelect');
+        var wardSelect = document.getElementById('wardSelect');
+        
+        // Clear district and ward options
+        districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+        wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+        
+        if (cityId) {
+            districtSelect.disabled = false;
+            wardSelect.disabled = true;
+            
+            // Add district options
+            var districts = addressData[cityId];
+            if (districts) {
+                for (var districtId in districts) {
+                    var districtName = getDistrictName(districtId);
+                    districtSelect.innerHTML += '<option value="' + districtId + '">' + districtName + '</option>';
+                }
+            }
+        } else {
+            districtSelect.disabled = true;
+            wardSelect.disabled = true;
+        }
+    });
+
+    // District change handler
+    document.getElementById('districtSelect').addEventListener('change', function() {
+        var cityId = document.getElementById('citySelect').value;
+        var districtId = this.value;
+        var wardSelect = document.getElementById('wardSelect');
+        
+        // Clear ward options
+        wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+        
+        if (districtId) {
+            wardSelect.disabled = false;
+            
+            // Add ward options
+            var wards = addressData[cityId][districtId];
+            if (wards) {
+                for (var i = 0; i < wards.length; i++) {
+                    wardSelect.innerHTML += '<option value="' + wards[i] + '">' + wards[i] + '</option>';
+                }
+            }
+        } else {
+            wardSelect.disabled = true;
+        }
+    });
+
+    // Helper function to get district name
+    function getDistrictName(districtId) {
+        var districtNames = {
+            'baidinh': 'Ba Đình',
+            'hoankiem': 'Hoàn Kiếm',
+            'dongda': 'Đống Đa',
+            'quan1': 'Quận 1',
+            'quan2': 'Quận 2',
+            'quan3': 'Quận 3',
+            'quan4': 'Quận 4',
+            'haichau': 'Hải Châu',
+            'thanhkhe': 'Thanh Khê',
+            'hongbang': 'Hồng Bàng',
+            'ngoquyen': 'Ngô Quyền',
+            'ninhkieu': 'Ninh Kiều',
+            'binhthuy': 'Bình Thủy'
+        };
+        return districtNames[districtId] || districtId;
+    }
+
+    // Apply promo code function
+    function applyPromoCode() {
+        var promoCode = document.getElementById('promoCode').value;
+        if (promoCode.trim() === '') {
+            alert('Vui lòng nhập mã khuyến mãi');
+            return;
+        }
+
+        // Simulate promo code application
+        // In real implementation, this would call the server
+        alert('Mã khuyến mãi đã được áp dụng!');
+        
+        // Update discount display
+        document.getElementById('discount').textContent = '10.000 ₫';
+        updateTotal();
+    }
+
+    // Update total amount
+    function updateTotal() {
+        var subtotal = parseFloat(document.getElementById('subtotal').textContent.replace(/[^\d]/g, ''));
+        var shippingFee = 22000;
+        var discount = parseFloat(document.getElementById('discount').textContent.replace(/[^\d]/g, ''));
+        var total = subtotal + shippingFee - discount;
+        
+        document.getElementById('totalAmount').textContent = total.toLocaleString() + ' ₫';
+    }
+
+    // Confirm payment function
+    function confirmPayment() {
+        console.log('confirmPayment called'); // Debug log
+        
+        // Validate form
+        var form = document.getElementById('checkoutForm');
+        if (!form) {
+            console.log('Form not found');
+            return;
+        }
+        
+        if (!form.checkValidity()) {
+            console.log('Form validation failed');
+            form.classList.add('was-validated');
+            return;
+        }
+
+        console.log('Form validation passed');
+
+        // Get form data
+        var formData = new FormData(form);
+        var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+        
+        if (!paymentMethod) {
+            alert('Vui lòng chọn phương thức thanh toán');
+            return;
+        }
+
+        // Show loading
+        var confirmBtn = document.querySelector('button[type="submit"]');
+        if (!confirmBtn) {
+            console.log('Submit button not found');
+            return;
+        }
+        
+        var originalText = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang xử lý...';
+        confirmBtn.disabled = true;
+
+        console.log('Submitting form...');
+
+        // Submit order
+        $.ajax({
+            url: '@Url.Action("Checkout", "Order")',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log('Response received:', response);
+                if (response.success) {
+                    // Show success message
+                    showMessage('Đặt hàng thành công! Hóa đơn đã được gửi cho admin.', 'success');
+                    
+                    // Redirect to confirmation page
+                    setTimeout(function() {
+                        window.location.href = '@Url.Action("Confirmation", "Order")' + '/' + response.orderId;
+                    }, 2000);
+                } else {
+                    showMessage(response.message || 'Có lỗi xảy ra khi đặt hàng', 'error');
+                    confirmBtn.innerHTML = originalText;
+                    confirmBtn.disabled = false;
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX error:', error);
+                showMessage('Có lỗi xảy ra khi đặt hàng: ' + error, 'error');
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            }
+        });
+    }
+
+    // Show message function
+    function showMessage(message, type) {
+        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        var icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
+        
+        var messageHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="bi ${icon} me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Show at top of page
+        $('body').prepend(messageHtml);
+        
+        // Auto hide after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    }
+
+    // Form validation and event binding
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            // Bind form submission
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    confirmPayment();
+                }, false);
+            });
+            
+            // Also bind directly to submit button as backup
+            var submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    confirmPayment();
+                });
+            }
+        }, false);
+    })();
+</script>

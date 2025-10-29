@@ -1,0 +1,234 @@
+@{
+    ViewBag.Title = "Test Customer Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Test Customer Login</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Test Accounts:</h5>
+                        <ul class="mb-0">
+                            <li><strong>Customer 1:</strong> testuser / 123456</li>
+                            <li><strong>Customer 2:</strong> customer1 / 123456</li>
+                            <li><strong>Admin:</strong> admin / admin123</li>
+                        </ul>
+                    </div>
+                    
+                    <form id="testLoginForm">
+                        <div class="mb-3">
+                            <label for="testUsername" class="form-label">Username/Email</label>
+                            <input type="text" class="form-control" id="testUsername" name="username" value="testuser" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="testPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="testPassword" name="password" value="123456" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Test Login</button>
+                    </form>
+                    
+                    <div id="testResult" class="mt-3"></div>
+                    
+                    <div class="mt-4">
+                        <h5>Quick Actions:</h5>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="testCustomerLogin()">Test Customer Login</button>
+                            <button class="btn btn-outline-success" onclick="testAdminLogin()">Test Admin Login</button>
+                            <button class="btn btn-outline-info" onclick="checkCurrentUser()">Check Current User</button>
+                            <button class="btn btn-outline-warning" onclick="resetTestUsers()">Reset Test Users</button>
+                        </div>
+                        
+                        <h5 class="mt-4">Debug Actions:</h5>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-danger" onclick="restoreAdminLogin()">🔄 Restore Admin Login</button>
+                            <button class="btn btn-outline-danger" onclick="fixAdminPassword()">Fix Admin Password</button>
+                            <button class="btn btn-outline-secondary" onclick="testPasswordHash()">Test Password Hash</button>
+                            <button class="btn btn-outline-dark" onclick="createTestCustomers()">Create Test Customers</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#testLoginForm').on('submit', function(e) {
+                e.preventDefault();
+                testLogin();
+            });
+        });
+        
+        function testLogin() {
+            var username = $('#testUsername').val();
+            var password = $('#testPassword').val();
+            
+            $.ajax({
+                url: '@Url.Action("DirectLoginTest", "Account")',
+                type: 'GET',
+                data: { email: username, password: password },
+                success: function(response) {
+                    var resultHtml = '';
+                    if (response.success) {
+                        if (response.passwordMatch) {
+                            resultHtml = '<div class="alert alert-success">✅ Login successful!<br>' +
+                                'User: ' + response.user.username + '<br>' +
+                                'Email: ' + response.user.email + '<br>' +
+                                'Role: ' + (response.user.role || 'Customer') + '</div>';
+                        } else {
+                            resultHtml = '<div class="alert alert-danger">❌ Password does not match</div>';
+                        }
+                    } else {
+                        resultHtml = '<div class="alert alert-danger">❌ ' + response.message + '</div>';
+                    }
+                    $('#testResult').html(resultHtml);
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error occurred</div>');
+                }
+            });
+        }
+        
+        function testCustomerLogin() {
+            $('#testUsername').val('testuser');
+            $('#testPassword').val('123456');
+            testLogin();
+        }
+        
+        function testAdminLogin() {
+            $('#testUsername').val('admin');
+            $('#testPassword').val('admin123');
+            testLogin();
+        }
+        
+        function checkCurrentUser() {
+            $.ajax({
+                url: '@Url.Action("GetCurrentUserInfo", "Account")',
+                type: 'GET',
+                success: function(response) {
+                    var resultHtml = '';
+                    if (response.isLoggedIn) {
+                        resultHtml = '<div class="alert alert-info">👤 Current User:<br>' +
+                            'Username: ' + response.username + '<br>' +
+                            'Role: ' + response.role + '<br>' +
+                            'User ID: ' + response.userId + '</div>';
+                    } else {
+                        resultHtml = '<div class="alert alert-warning">⚠️ No user logged in</div>';
+                    }
+                    $('#testResult').html(resultHtml);
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error checking current user</div>');
+                }
+            });
+        }
+        
+        function resetTestUsers() {
+            $.ajax({
+                url: '@Url.Action("ResetAllPasswords", "Account")',
+                type: 'GET',
+                success: function(response) {
+                    $('#testResult').html('<div class="alert alert-success">✅ Test users reset successfully</div>');
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error resetting users</div>');
+                }
+            });
+        }
+        
+        function fixAdminPassword() {
+            $.ajax({
+                url: '@Url.Action("FixAdminPassword", "Account")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        var resultHtml = '<div class="alert alert-success">✅ Admin password fixed!<br>' +
+                            'Username: ' + response.adminInfo.username + '<br>' +
+                            'Password: ' + response.adminInfo.password + '<br>' +
+                            'Password Match: ' + response.adminInfo.passwordMatch + '</div>';
+                        $('#testResult').html(resultHtml);
+                    } else {
+                        $('#testResult').html('<div class="alert alert-danger">❌ ' + response.message + '</div>');
+                    }
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error fixing admin password</div>');
+                }
+            });
+        }
+        
+        function testPasswordHash() {
+            $.ajax({
+                url: '@Url.Action("TestPasswordHash", "Account")',
+                type: 'GET',
+                data: { password: 'admin123' },
+                success: function(response) {
+                    if (response.success) {
+                        var resultHtml = '<div class="alert alert-info">🔍 Password Hash Test:<br>' +
+                            'Password: ' + response.password + '<br>' +
+                            'Computed Hash: ' + response.computedHash + '<br>' +
+                            'Database Hash: ' + response.databaseHash + '<br>' +
+                            'Matches: ' + response.matches + '</div>';
+                        $('#testResult').html(resultHtml);
+                    } else {
+                        $('#testResult').html('<div class="alert alert-danger">❌ ' + response.message + '</div>');
+                    }
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error testing password hash</div>');
+                }
+            });
+        }
+        
+        function createTestCustomers() {
+            $.ajax({
+                url: '@Url.Action("CreateTestCustomers", "Account")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        var resultHtml = '<div class="alert alert-success">✅ Test customers created:<br>';
+                        response.customers.forEach(function(customer) {
+                            resultHtml += customer.username + ' / ' + customer.password + '<br>';
+                        });
+                        resultHtml += '</div>';
+                        $('#testResult').html(resultHtml);
+                    } else {
+                        $('#testResult').html('<div class="alert alert-danger">❌ ' + response.message + '</div>');
+                    }
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error creating test customers</div>');
+                }
+            });
+        }
+        
+        function restoreAdminLogin() {
+            $.ajax({
+                url: '@Url.Action("RestoreAdminLogin", "Account")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        var resultHtml = '<div class="alert alert-success">✅ Admin login restored!<br>' +
+                            'Username: ' + response.credentials.username + '<br>' +
+                            'Password: ' + response.credentials.password + '<br>' +
+                            'Email: ' + response.credentials.email + '<br><br>' +
+                            '<strong>Now try logging in again!</strong></div>';
+                        $('#testResult').html(resultHtml);
+                    } else {
+                        $('#testResult').html('<div class="alert alert-danger">❌ ' + response.message + '</div>');
+                    }
+                },
+                error: function() {
+                    $('#testResult').html('<div class="alert alert-danger">❌ Error restoring admin login</div>');
+                }
+            });
+        }
+    </script>
+}

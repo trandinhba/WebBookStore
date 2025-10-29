@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
+using System.Data.Entity;
 using WebBookStore.Data;
 using WebBookStore.Models;
 using WebBookStore.Repositories;
+using WebBookStore.Filters;
+using WebBookStore.Helpers;
 
 namespace WebBookStore.Controllers
 {
-    [Authorize]
+    [CustomerOnly]
     public class WishlistController : Controller
     {
         private readonly StoreDbContext _context;
@@ -27,9 +30,12 @@ namespace WebBookStore.Controllers
             var userId = GetCurrentUserId();
             var wishlists = _context.Wishlists
                 .Where(w => w.UserId == userId)
+                .Include("Book")
+                .Include("Book.Category")
                 .OrderByDescending(w => w.AddedDate)
                 .ToList();
 
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
             return View(wishlists);
         }
 

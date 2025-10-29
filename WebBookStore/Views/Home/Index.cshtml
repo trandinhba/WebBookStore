@@ -5,99 +5,278 @@
     var newBooks = ViewBag.NewBooks as IEnumerable<WebBookStore.Models.Book>;
 }
 
-<div class="row g-3 mb-4">
-    <div class="col-lg-8">
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner rounded-2 shadow-sm" style="height: 320px;">
-                <div class="carousel-item active bg-light d-flex align-items-center justify-content-center">
-                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE 1</div>
-                </div>
-                <div class="carousel-item bg-light d-flex align-items-center justify-content-center">
-                    <div class="display-6 fw-bold text-secondary">SALE EXAMPLE 2</div>
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span></button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span></button>
+@section Styles {
+    <link href="~/Content/homepage.css" rel="stylesheet" />
+    <style>
+        .banner-link {
+            position: relative;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .banner-overlay h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .banner-overlay p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .banner-overlay-small {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 10px;
+        }
+        
+        .banner-overlay-small h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .promo-card {
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .promo-main {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .promo-main:hover {
+            transform: translateY(-5px);
+        }
+        
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+    </style>
+}
+
+<div class="homepage-container">
+    <!-- Promotional Section -->
+    <div class="main-content">
+        <div class="promo-section">
+            <img src="/Content/images/banners/sale-sach-50.svg" alt="SALE SÁCH ƯU ĐÃI ĐẾN TỐI ĐA 50%" class="img-fluid" style="width: 100%; height: 400px; object-fit: cover; display: block;" />
         </div>
     </div>
-    <div class="col-lg-4 d-grid gap-3">
-        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE 3</div>
-        <div class="p-4 bg-light rounded-2 shadow-sm d-flex align-items-center justify-content-center fw-semibold text-secondary">SALE EXAMPLE 4</div>
+
+    <!-- Navigation Section -->
+    <div class="container my-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="@Url.Action("Index", "Books")" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-book-fill text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">Tất cả Sách</h5>
+                            <p class="card-text text-muted">Khám phá toàn bộ bộ sưu tập sách của chúng tôi</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="@Url.Action("Category", "Books", new { id = 1 })" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-journal-text text-success" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">Light Novel</h5>
+                            <p class="card-text text-muted">Tiểu thuyết nhẹ Nhật Bản</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="@Url.Action("Category", "Books", new { id = 2 })" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-images text-warning" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">Manga</h5>
+                            <p class="card-text text-muted">Truyện tranh Nhật Bản</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Section -->
+    <div class="product-section">
+        <div class="container">
+            <div class="section-banner d-flex justify-content-between align-items-center">
+                <h2>SẢN PHẨM BÁN CHẠY</h2>
+                <a href="@Url.Action("Index", "Books")" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-right me-1"></i>Xem tất cả
+                </a>
+            </div>
+            
+            <div class="product-grid">
+                @if (bestSellingBooks != null && bestSellingBooks.Any())
+                {
+                    foreach (var book in bestSellingBooks.Take(4))
+                    {
+                        <div class="product-card">
+                            <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                                @if (!string.IsNullOrEmpty(book.ImageUrl))
+                                {
+                                    <img class="product-image" src="@Url.Content(book.ImageUrl)" alt="@book.Title" onerror="this.src='/Content/images/no-image.svg'">
+                                }
+                                else
+                                {
+                                    <img class="product-image" src="/Content/images/no-image.svg" alt="@book.Title">
+                                }
+                            </a>
+                            <div class="product-info">
+                                <h3 class="product-title">
+                                    <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                                        @book.Title
+                                    </a>
+                                </h3>
+                                <div class="product-price">
+                                    @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
+                                    {
+                                        <span class="text-danger">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
+                                        <span class="product-price original">@String.Format("{0:N0} ₫", book.Price)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@String.Format("{0:N0} ₫", book.Price)</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <!-- Default products if no data -->
+                    <div class="product-card">
+                        <img class="product-image" src="~/Content/images/sword-art-online-1.jpg" alt="Sword Art Online 001">
+                        <div class="product-info">
+                            <h3 class="product-title">Sword Art Online 001</h3>
+                            <div class="product-price">150,000 ₫</div>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img class="product-image" src="~/Content/images/sword-art-online-5.jpg" alt="Sword Art Online 005">
+                        <div class="product-info">
+                            <h3 class="product-title">Sword Art Online 005</h3>
+                            <div class="product-price">150,000 ₫</div>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img class="product-image" src="~/Content/images/jujutsu-kaisen.jpg" alt="Chú Thuật Lạt Thiên">
+                        <div class="product-info">
+                            <h3 class="product-title">Chú Thuật Lạt Thiên</h3>
+                            <div class="product-price">120,000 ₫</div>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img class="product-image" src="~/Content/images/tokyo-revengers-4.jpg" alt="Tokyo Revengers 4">
+                        <div class="product-info">
+                            <h3 class="product-title">Tokyo Revengers 4</h3>
+                            <div class="product-price">130,000 ₫</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- New Books Section -->
+    <div class="product-section mt-5">
+        <div class="container">
+            <div class="section-banner d-flex justify-content-between align-items-center">
+                <h2>SÁCH MỚI NHẤT</h2>
+                <a href="@Url.Action("Index", "Books")" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-right me-1"></i>Xem tất cả
+                </a>
+            </div>
+            
+            <div class="product-grid">
+                @if (newBooks != null && newBooks.Any())
+                {
+                    foreach (var book in newBooks.Take(4))
+                    {
+                        <div class="product-card">
+                            <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                                @if (!string.IsNullOrEmpty(book.ImageUrl))
+                                {
+                                    <img class="product-image" src="@Url.Content(book.ImageUrl)" alt="@book.Title" onerror="this.src='/Content/images/no-image.svg'">
+                                }
+                                else
+                                {
+                                    <img class="product-image" src="/Content/images/no-image.svg" alt="@book.Title">
+                                }
+                            </a>
+                            <div class="product-info">
+                                <h3 class="product-title">
+                                    <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                                        @book.Title
+                                    </a>
+                                </h3>
+                                <div class="product-price">
+                                    @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
+                                    {
+                                        <span class="text-danger">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
+                                        <span class="product-price original">@String.Format("{0:N0} ₫", book.Price)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@String.Format("{0:N0} ₫", book.Price)</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
     </div>
 </div>
-
-<hr class="mt-4" />
-
-<section class="mb-5">
-    <div class="section-title">SẢN PHẨM BÁN CHẠY</div>
-    <div class="row g-3 pt-3">
-        @if (bestSellingBooks != null && bestSellingBooks.Any())
-        {
-            foreach (var book in bestSellingBooks)
-            {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="card h-100 book-card shadow-sm">
-                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
-                            <img class="card-img-top" src="@Url.Content(book.ImageUrl)" alt="@book.Title">
-                        </a>
-                        <div class="card-body p-2 d-flex flex-column">
-                            <h5 class="card-title book-title mb-1">
-                                <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
-                                    @book.Title
-                                </a>
-                            </h5>
-                            <div class="mt-auto">
-                                @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
-                                {
-                                    <span class="fw-bold text-danger me-2">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
-                                    <span class="text-muted text-decoration-line-through small">@String.Format("{0:N0} ₫", book.Price)</span>
-                                }
-                                else
-                                {
-                                    <span class="fw-bold text-dark">@String.Format("{0:N0} ₫", book.Price)</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-    </div>
-</section>
-
-<section class="mb-3">
-    <div class="section-title">SÁCH MỚI NHẤT</div>
-    <div class="row g-3 pt-3">
-        @if (newBooks != null && newBooks.Any())
-        {
-            foreach (var book in newBooks)
-            {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="card h-100 book-card shadow-sm">
-                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
-                            <img class="card-img-top" src="@Url.Content(book.ImageUrl)" alt="@book.Title">
-                        </a>
-                        <div class="card-body p-2 d-flex flex-column">
-                            <h5 class="card-title book-title mb-1">
-                                <a href="@Url.Action("Details", "Books", new { id = book.BookId })" class="text-decoration-none text-dark">
-                                    @book.Title
-                                </a>
-                            </h5>
-                            <div class="mt-auto">
-                                @if (book.DiscountPrice.HasValue && book.DiscountPrice < book.Price)
-                                {
-                                    <span class="fw-bold text-danger me-2">@String.Format("{0:N0} ₫", book.DiscountPrice)</span>
-                                    <span class="text-muted text-decoration-line-through small">@String.Format("{0:N0} ₫", book.Price)</span>
-                                }
-                                else
-                                {
-                                    <span class="fw-bold text-dark">@String.Format("{0:N0} ₫", book.Price)</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-    </div>
-</section>

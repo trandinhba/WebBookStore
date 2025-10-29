@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.Mvc;
 using WebBookStore.Data;
 using WebBookStore.Services;
 using WebBookStore.Repositories;
+using WebBookStore.Filters;
+using WebBookStore.Helpers;
 
 namespace WebBookStore.Controllers
 {
@@ -34,41 +37,45 @@ namespace WebBookStore.Controllers
                 books = books.Where(b => b.CategoryId == categoryId.Value);
             }
 
-            // Search
+            // Convert to list first to avoid LINQ to SQL issues with computed properties and search
+            var booksList = books.ToList();
+            
+            // Search (case-insensitive) - now in memory
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                books = books.Where(b => b.Title.Contains(searchTerm) ||
-                                        b.Author.Contains(searchTerm) ||
-                                        b.ISBN.Contains(searchTerm));
+                var searchLower = searchTerm.ToLower();
+                booksList = booksList.Where(b => (b.Title != null && b.Title.ToLower().Contains(searchLower)) ||
+                                                (b.Author != null && b.Author.ToLower().Contains(searchLower)) ||
+                                                (b.ISBN != null && b.ISBN.ToLower().Contains(searchLower))).ToList();
             }
-
-            // Sort
+            
+            // Sort in memory (for computed properties like FinalPrice)
             switch (sortBy)
             {
                 case "price_asc":
-                    books = books.OrderBy(b => b.FinalPrice);
+                    booksList = booksList.OrderBy(b => b.FinalPrice).ToList();
                     break;
                 case "price_desc":
-                    books = books.OrderByDescending(b => b.FinalPrice);
+                    booksList = booksList.OrderByDescending(b => b.FinalPrice).ToList();
                     break;
                 case "name_asc":
-                    books = books.OrderBy(b => b.Title);
+                    booksList = booksList.OrderBy(b => b.Title).ToList();
                     break;
                 case "name_desc":
-                    books = books.OrderByDescending(b => b.Title);
+                    booksList = booksList.OrderByDescending(b => b.Title).ToList();
                     break;
                 case "newest":
-                    books = books.OrderByDescending(b => b.CreatedDate);
+                    booksList = booksList.OrderByDescending(b => b.CreatedDate).ToList();
                     break;
                 default:
-                    books = books.OrderByDescending(b => b.CreatedDate);
+                    booksList = booksList.OrderByDescending(b => b.CreatedDate).ToList();
                     break;
             }
 
             // Pagination
-            var totalItems = books.Count();
+            var totalItems = booksList.Count();
             var totalPages = (int)System.Math.Ceiling(totalItems / (double)pageSize);
-            var pagedBooks = books.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var pagedBooks = booksList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             ViewBag.Categories = _context.Categories.ToList();
             ViewBag.CurrentCategory = categoryId;
@@ -77,6 +84,7 @@ namespace WebBookStore.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
 
             return View(pagedBooks);
         }
@@ -98,6 +106,7 @@ namespace WebBookStore.Controllers
                 .ToList();
 
             ViewBag.RelatedBooks = relatedBooks;
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
 
             return View(book);
         }
@@ -114,29 +123,44 @@ namespace WebBookStore.Controllers
             var books = _bookService.GetBooksByCategory(id);
             ViewBag.Category = category;
             ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
 
             return View(books);
         }
 
         // POST: Books/AddReview
         [HttpPost]
-        [Authorize]
+        [CustomerOnly]
         public ActionResult AddReview(int bookId, int rating, string comment)
         {
-            var userId = GetCurrentUserId();
-
-            var review = new Models.Review
+            try
             {
-                BookId = bookId,
-                UserId = userId,
-                Rating = rating,
-                Comment = comment
-            };
+                var userId = GetCurrentUserId();
 
-            _context.Reviews.Add(review);
-            _context.SaveChanges();
+                if (userId == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để đánh giá" });
+                }
 
-            return RedirectToAction("Details", new { id = bookId });
+                var review = new Models.Review
+                {
+                    BookId = bookId,
+                    UserId = userId,
+                    Rating = rating,
+                    Comment = comment,
+                    CreatedDate = DateTime.Now,
+                    ReviewDate = DateTime.Now
+                };
+
+                _context.Reviews.Add(review);
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Cảm ơn bạn đã đánh giá!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         private int GetCurrentUserId()

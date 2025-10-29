@@ -58,4 +58,29 @@ namespace WebBookStore.Models
             Role = "Customer";
         }
     }
+
+    public class DashboardStats
+    {
+        public int Unresolved { get; set; }
+        public int Overdue { get; set; }
+        public int InProgress { get; set; }
+        public int PendingApproval { get; set; }
+    }
+
+    public class RequestStats
+    {
+        public int PendingResolution { get; set; }
+        public int CustomerBugReports { get; set; }
+        public int WaitingForDevFix { get; set; }
+        public int PendingApproval { get; set; }
+    }
+
+    public class TaskItem
+    {
+        public int Id { get; set; }
+        public string Text { get; set; }
+        public bool Completed { get; set; }
+        public string Type { get; set; }
+        public string Tag { get; set; }
+    }
 }
