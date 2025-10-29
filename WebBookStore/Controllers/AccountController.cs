@@ -1122,6 +1122,273 @@ namespace WebBookStore.Controllers
             }
         }
 
+        /// <summary>
+        /// Test login page
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult TestLogin()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Get current user info
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult GetCurrentUserInfo()
+        {
+            try
+            {
+                var userInfo = PermissionHelper.GetCurrentUserInfo();
+                return Json(new
+                {
+                    success = true,
+                    isLoggedIn = userInfo.IsLoggedIn,
+                    username = userInfo.Username,
+                    role = userInfo.Role,
+                    userId = userInfo.UserId
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Create test customers for development
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult CreateTestCustomers()
+        {
+            try
+            {
+                var customers = new[]
+                {
+                    new User
+                    {
+                        Username = "customer1",
+                        PasswordHash = HashPassword("123456"),
+                        Email = "customer1@test.com",
+                        FullName = "Customer One",
+                        Role = RoleConstants.CUSTOMER,
+                        IsActive = true,
+                        CreatedDate = DateTime.Now,
+                        PhoneNumber = "0987654321",
+                        Address = "456 Customer Street"
+                    },
+                    new User
+                    {
+                        Username = "customer2",
+                        PasswordHash = HashPassword("123456"),
+                        Email = "customer2@test.com",
+                        FullName = "Customer Two",
+                        Role = RoleConstants.CUSTOMER,
+                        IsActive = true,
+                        CreatedDate = DateTime.Now,
+                        PhoneNumber = "0555666777",
+                        Address = "789 Customer Avenue"
+                    }
+                };
+
+                var results = new List<object>();
+                foreach (var customer in customers)
+                {
+                    if (!_context.Users.Any(u => u.Username == customer.Username))
+                    {
+                        _context.Users.Add(customer);
+                        results.Add(new
+                        {
+                            username = customer.Username,
+                            email = customer.Email,
+                            password = "123456",
+                            created = true
+                        });
+                    }
+                    else
+                    {
+                        results.Add(new
+                        {
+                            username = customer.Username,
+                            email = customer.Email,
+                            password = "123456",
+                            created = false,
+                            message = "Already exists"
+                        });
+                    }
+                }
+
+                _context.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Test customers created successfully",
+                    customers = results
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Fix admin password and test login
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult FixAdminPassword()
+        {
+            try
+            {
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                
+                if (adminUser == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Admin user not found"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Reset admin password với hash đúng
+                var newPassword = "admin123";
+                var oldHash = adminUser.PasswordHash;
+                adminUser.PasswordHash = HashPassword(newPassword);
+                adminUser.IsActive = true;
+                
+                _context.SaveChanges();
+                
+                // Test verification
+                var passwordMatch = VerifyPassword(newPassword, adminUser.PasswordHash);
+                
+                return Json(new
+                {
+                    success = true,
+                    message = "Admin password fixed successfully!",
+                    adminInfo = new
+                    {
+                        username = adminUser.Username,
+                        email = adminUser.Email,
+                        password = newPassword,
+                        oldHash = oldHash,
+                        newHash = adminUser.PasswordHash,
+                        passwordMatch = passwordMatch,
+                        isActive = adminUser.IsActive
+                    }
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Test password hash for debugging
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult TestPasswordHash(string password = "admin123")
+        {
+            try
+            {
+                var hash = HashPassword(password);
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                var databaseHash = adminUser?.PasswordHash;
+                var matches = hash.Equals(databaseHash, StringComparison.OrdinalIgnoreCase);
+
+                return Json(new
+                {
+                    success = true,
+                    password = password,
+                    computedHash = hash,
+                    databaseHash = databaseHash,
+                    matches = matches,
+                    message = $"Password '{password}' hash: {hash}. Database: {databaseHash}. Match: {matches}"
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Restore original admin login - simple reset
+        /// </summary>
+        [AllowAnonymous]
+        public ActionResult RestoreAdminLogin()
+        {
+            try
+            {
+                // Tìm admin user
+                var adminUser = _context.Users.FirstOrDefault(u => u.Role == RoleConstants.ADMIN);
+                
+                if (adminUser == null)
+                {
+                    // Tạo admin user mới nếu không tồn tại
+                    adminUser = new User
+                    {
+                        Username = "admin",
+                        PasswordHash = HashPassword("admin123"),
+                        Email = "admin@sach50.com",
+                        FullName = "Quản Trị Viên",
+                        Role = RoleConstants.ADMIN,
+                        IsActive = true,
+                        CreatedDate = DateTime.Now,
+                        PhoneNumber = "0123456789",
+                        Address = "Hệ thống quản trị"
+                    };
+                    _context.Users.Add(adminUser);
+                }
+                else
+                {
+                    // Reset password về admin123
+                    adminUser.PasswordHash = HashPassword("admin123");
+                    adminUser.IsActive = true;
+                }
+                
+                _context.SaveChanges();
+                
+                return Json(new
+                {
+                    success = true,
+                    message = "Admin login restored successfully!",
+                    credentials = new
+                    {
+                        username = "admin",
+                        password = "admin123",
+                        email = "admin@sach50.com"
+                    }
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error restoring admin: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }
 

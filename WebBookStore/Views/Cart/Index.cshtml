@@ -1,4 +1,4 @@
-﻿@model WebBookStore.Models.CartViewModel
+﻿@model WebBookStore.ViewModels.CartViewModel
 
 @{
     ViewBag.Title = "Giỏ hàng";
@@ -177,8 +177,8 @@
         }
 
         function proceedToCheckout() {
-            // Redirect to checkout page (to be implemented)
-            alert('Chức năng thanh toán đang được phát triển');
+            // Redirect to checkout page
+            window.location.href = '@Url.Action("Checkout", "Order")';
         }
     </script>
 }

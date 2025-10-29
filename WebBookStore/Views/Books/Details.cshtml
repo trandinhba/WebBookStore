@@ -4,235 +4,706 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="productdetailpage">
-    <section class="trang-chi-tit" style="max-width: 1200px; margin: auto; padding: 20px;">
+@section Styles {
+    <style>
+        .book-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .book-image-section {
+            text-align: center;
+        }
+        
+        .book-image {
+            max-width: 100%;
+            height: 500px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .book-info-section {
+            padding-left: 30px;
+        }
+        
+        .book-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        
+        .book-meta {
+            margin-bottom: 20px;
+        }
+        
+        .book-meta p {
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .rating-section {
+            margin-bottom: 25px;
+        }
+        
+        .rating-stars {
+            font-size: 1.5rem;
+            color: #ffc107;
+            margin-right: 10px;
+        }
+        
+        .rating-text {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .price-section {
+            margin-bottom: 30px;
+        }
+        
+        .book-price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .quantity-section {
+            margin-bottom: 30px;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .quantity-input-group {
+            display: flex;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .quantity-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 12px 16px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .quantity-input {
+            border: none;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 1.2rem;
+            width: 80px;
+            outline: none;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .btn-buy-now {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-buy-now:hover {
+            background: #0056b3;
+        }
+        
+        .btn-add-cart {
+            background: white;
+            color: #007bff;
+            border: 2px solid #007bff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-add-cart:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-wishlist {
+            background: white;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-wishlist:hover {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-section h3 {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 10px 10px 0 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .info-value {
+            color: #666;
+        }
+        
+        .description-text {
+            line-height: 1.6;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        
+        .reviews-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .reviews-section h3 {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 10px 10px 0 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .rating-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .rating-breakdown {
+            flex: 1;
+        }
+        
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .rating-bar-label {
+            width: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .rating-bar-fill {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .rating-bar-progress {
+            height: 100%;
+            background: #ffc107;
+            border-radius: 4px;
+        }
+        
+        .rating-bar-count {
+            width: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .btn-write-review {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-write-review:hover {
+            background: #0056b3;
+        }
+        
+        .stock-status {
+            margin-bottom: 20px;
+        }
+        
+        .stock-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .stock-in {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .stock-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @@media (max-width: 768px) {
+            .book-info-section {
+                padding-left: 0;
+                margin-top: 30px;
+            }
+            
+            .book-title {
+                font-size: 2rem;
+            }
+            
+            .book-price {
+                font-size: 2.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .rating-summary {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+}
+
+<div class="book-detail-container">
+    <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang Chủ</a></li>
                 <li class="breadcrumb-item"><a href="@Url.Action("Index", "Books")">Sách</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Category", "Books", new { id = Model.CategoryId })">@Model.Category.CategoryName</a></li>
                 <li class="breadcrumb-item active">@Model.Title</li>
             </ol>
         </nav>
 
-        <div class="trang-chi-tit-inner">
-            <div class="frame-parent23">
-                <section class="productdetailpage-frame-wrapper">
-                    <div class="sao-pro7-2-parent">
-                        <div class="position-relative">
+    <div class="row">
+        <!-- Book Image Section -->
+        <div class="col-lg-5">
+            <div class="book-image-section">
                             @if (!string.IsNullOrEmpty(Model.ImageUrl))
                             {
-                                <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="@Url.Content(Model.ImageUrl)" onerror="this.src='/Content/images/no-image.svg'" />
+                    <img src="@Url.Content(Model.ImageUrl)" alt="@Model.Title" class="book-image" onerror="this.src='/Content/images/no-image.svg'" />
                             }
                             else
                             {
-                                <img class="sao-pro7-2-icon" loading="lazy" alt="@Model.Title" src="/Content/images/no-image.svg" />
-                            }
-                            @if (Model.StockQuantity <= 0)
-                            {
-                                <div class="position-absolute top-0 start-0 badge bg-danger m-2 fs-6">Hết hàng</div>
-                            }
-                            else if (Model.StockQuantity < 10)
-                            {
-                                <div class="position-absolute top-0 start-0 badge bg-warning m-2 fs-6">Còn @Model.StockQuantity</div>
+                    <img src="/Content/images/no-image.svg" alt="@Model.Title" class="book-image" />
                             }
                         </div>
+        </div>
 
-                        <div class="sword-art-online-progressive-v-parent">
-                            <h2 class="productdetailpage-sword-art-online">@Model.Title</h2>
-                            <div class="nh-xut-bn-ipm-h-ni-wrapper">
-                                <h3 class="nh-xut-bn-container">
-                                    <span class="nh-xut-bn">Nhà Xuất Bản: </span>
-                                    <span class="ipm">@Model.Publisher</span>
-                                </h3>
+        <!-- Book Info Section -->
+        <div class="col-lg-7">
+            <div class="book-info-section">
+                <!-- Book Title -->
+                <h1 class="book-title">@Model.Title</h1>
+
+                <!-- Book Meta Information -->
+                <div class="book-meta">
+                    <p><strong>Nhà Xuất Bản:</strong> @(Model.Publisher != null ? Model.Publisher : "Chưa cập nhật")</p>
+                    <p><strong>Tác Giả:</strong> @Model.Author</p>
                             </div>
-                            <div class="frame-parent24">
-                                <div class="frame-wrapper4">
-                                    <div class="tc-gi-reki-kawahara-parent">
-                                        <h3 class="tc-gi-reki-container">
-                                            <span>Tác Giả: </span>
-                                            <span class="ipm">@Model.Author</span>
-                                        </h3>
-                                        <div class="frame-wrapper5">
-                                            <div class="productdetailpage-vector-parent">
-                                                @for (var i = 1; i <= 5; i++)
-                                                {
-                                                    if (i <= Math.Round(Model.AverageRating))
-                                                    {<i class="bi bi-star-fill text-warning fs-5"></i> }
-                                                    else
-                                                    { <i class="bi bi-star text-warning fs-5"></i>}
-                                                }
-                                                <h3 class="h3">(@Model.ReviewCount)</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price)
+
+                <!-- Rating Section -->
+                <div class="rating-section">
+                    <div class="d-flex align-items-center">
+                        <div class="rating-stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Floor(Model.AverageRating))
                                 {
-                                    var discountPercent = Math.Round(100 - (Model.DiscountPrice.Value / Model.Price * 100), 0);
-                                    <div class="mb-2">
-                                        <span class="text-decoration-line-through text-muted fs-5">@String.Format("{0:N0} ₫", Model.Price)</span>
-                                        <span class="badge bg-danger ms-2">-@discountPercent%</span>
-                                    </div>
-                                    <div class="display-6 fw-bold text-danger mb-4">@String.Format("{0:N0} ₫", Model.DiscountPrice)</div>
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else if (i == Math.Ceiling(Model.AverageRating) && Model.AverageRating % 1 != 0)
+                                {
+                                    <i class="bi bi-star-half"></i>
                                 }
                                 else
                                 {
-                                    <div class="display-6 fw-bold text-dark mb-4">@String.Format("{0:N0} ₫", Model.Price)</div>
+                                    <i class="bi bi-star"></i>
                                 }
-                            </div>
-                            <div class="d-flex align-items-center gap-3 mb-4">
-                                <span class="text-muted fw-bold">Số lượng:</span>
-                                <div class="input-group" style="width: 150px;">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(-1)">-</button>
-                                    <input id="qty" type="number" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" />
-                                    <button class="btn btn-outline-secondary" type="button" onclick="qtyStep(1)">+</button>
-                                </div>
-                                <span class="text-muted small">(@Model.StockQuantity sản phẩm có sẵn)</span>
-                            </div>
-                            <div class="frame-wrapper9">
-                                <div class="d-flex gap-2">
-                                    <button class="rectangle-parent3" style="width: 180px;" onclick="buyNow(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
-                                        <i class="bi bi-cart-check-fill text-white fs-5"></i>
-                                        <span class="mua-ngay">Mua Ngay</span>
-                                    </button>
-                                    <button class="rectangle-parent4" style="width: 220px;" onclick="addToCart(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
-                                        <i class="bi bi-cart-plus-fill fs-5" style="color: #2f70af;"></i>
-                                        <span class="thm-gi-hng">Thêm Giỏ Hàng</span>
-                                    </button>
-                                    <button class="btn btn-outline-danger" onclick="addToWishlist(@Model.BookId)"><i class="bi bi-heart"></i></button>
-                                </div>
-                            </div>
+                            }
                         </div>
-                    </div>
-                </section>
-
-                <div class="frame-parent27 mt-5">
-                    <div class="rectangle-parent5"><h3 class="thng-tin-chi">THÔNG TIN CHI TIẾT</h3></div>
-                    <div class="p-4 border">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-3">Mã Sách:</dt>
-                            <dd class="col-sm-9">@Model.ISBN</dd>
-                            <dt class="col-sm-3">Tác Giả:</dt>
-                            <dd class="col-sm-9">@Model.Author</dd>
-                            <dt class="col-sm-3">Nhà Xuất Bản:</dt>
-                            <dd class="col-sm-9">@Model.Publisher</dd>
-                            <dt class="col-sm-3">Năm Xuất Bản:</dt>
-                            <dd class="col-sm-9">@Model.PublishYear</dd>
-                            <dt class="col-sm-3">Ngôn Ngữ:</dt>
-                            <dd class="col-sm-9">@Model.Language</dd>
-                        </dl>
-                        <hr />
-                        <h5>Mô tả sản phẩm:</h5>
-                        <div class="d-thy-sword-container">@Html.Raw(Model.Description)</div>
+                        <span class="rating-text">(@Model.ReviewCount đánh giá)</span>
                     </div>
                 </div>
 
-                <div class="mt-5">
-                    <div class="rectangle-parent5"><h3 class="thng-tin-chi">ĐÁNH GIÁ</h3></div>
-                    <div class="bg-white border border-top-0 rounded-bottom p-4">
-                        <div class="row mb-4">
-                            <div class="col-md-4 text-center border-end">
-                                <div class="display-4 fw-bold text-primary">@String.Format("{0:0.0}", Model.AverageRating)<small class="text-muted fs-4">/5</small></div>
-                                <div class="my-2">
-                                    @for (var i = 1; i <= 5; i++)
-                                    {
-                                        if (i <= Math.Round(Model.AverageRating))
-                                        {<i class="bi bi-star-fill text-warning fs-5"></i> }
-                                        else
-                                        { <i class="bi bi-star text-warning fs-5"></i>}
-                                    }
-                                </div>
-                                <div class="text-muted">@Model.ReviewCount đánh giá</div>
-                            </div>
-                            <div class="col-md-5">
-                                @for (var star = 5; star >= 1; star--)
-                                {
-                                    var count = Model.Reviews?.Count(r => r.Rating == star) ?? 0;
-                                    var percentage = Model.ReviewCount > 0 ? (count * 100.0 / Model.ReviewCount) : 0;
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="me-2" style="width: 30px;">@star <i class="bi bi-star-fill text-warning"></i></span>
-                                        <div class="progress flex-grow-1" style="height: 8px;"><div class="progress-bar bg-warning" style="width: @percentage%"></div></div>
-                                        <span class="ms-2 text-muted small" style="width: 40px;">(@count)</span>
-                                    </div>
-                                }
-                            </div>
-                            <div class="col-md-3 text-center align-self-center"><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal"><i class="bi bi-pencil-square me-2"></i>Viết Đánh Giá</button></div>
-                        </div>
-                        <hr>
-                        <div id="reviewsList">
-                            @if (Model.Reviews != null && Model.Reviews.Any())
-                            {
-                                foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedDate))
-                                {
-                                    <div class="review-item border-bottom pb-3 mb-3">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <strong class="d-block">Khách hàng #@review.UserId</strong>
-                                                <div class="text-warning small">
-                                                    @for (var i = 1; i <= 5; i++)
-                                                    {
-                                                        if (i <= review.Rating)
-                                                        {<i class="bi bi-star-fill"></i> }
-                                                        else
-                                                        { <i class="bi bi-star"></i>}
-                                                    }
-                                                </div>
-                                            </div>
-                                            <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
-                                        </div>
-                                        <p class="mb-0">@review.Comment</p>
-                                    </div>
-                                }
-                            }
-                            else
-                            {
-                                <div class="text-center text-muted py-4"><p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p></div>
-                            }
-                        </div>
+                <!-- Price Section -->
+                <div class="price-section">
+                    <div class="book-price">
+                        @if (Model.DiscountPrice.HasValue && Model.DiscountPrice < Model.Price)
+                        {
+                            <span class="text-danger">@String.Format("{0:N0} ₫", Model.DiscountPrice)</span>
+                            <small class="text-muted text-decoration-line-through ms-2">@String.Format("{0:N0} ₫", Model.Price)</small>
+                        }
+                        else
+                        {
+                            @String.Format("{0:N0} ₫", Model.Price)
+                        }
                     </div>
+                </div>
+
+                <!-- Stock Status -->
+                <div class="stock-status">
+                    @if (Model.StockQuantity <= 0)
+                    {
+                        <span class="stock-badge stock-out">Hết hàng</span>
+                    }
+                    else if (Model.StockQuantity < 10)
+                    {
+                        <span class="stock-badge stock-low">Còn @Model.StockQuantity sản phẩm</span>
+                    }
+                    else
+                    {
+                        <span class="stock-badge stock-in">Còn hàng</span>
+                                }
+                            </div>
+
+                <!-- Quantity Section -->
+                <div class="quantity-section">
+                    <div class="quantity-controls">
+                        <span class="text-muted fw-bold">Số lượng:</span>
+                        <div class="quantity-input-group">
+                            <button class="quantity-btn" type="button" onclick="qtyStep(-1)">-</button>
+                            <input id="qty" type="number" class="quantity-input" value="1" min="1" max="@Model.StockQuantity" />
+                            <button class="quantity-btn" type="button" onclick="qtyStep(1)">+</button>
+                        </div>
+                        <span class="text-muted small">(@Model.StockQuantity sản phẩm có sẵn)</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-buy-now" onclick="buyNow(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                        <i class="bi bi-cart-check-fill"></i>
+                        Mua Ngay
+                    </button>
+                    <button class="btn-add-cart" onclick="addToCart(@Model.BookId)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                        <i class="bi bi-cart-plus-fill"></i>
+                        Thêm Giỏ Hàng
+                    </button>
+                    <button class="btn-wishlist" onclick="addToWishlist(@Model.BookId)">
+                        <i class="bi bi-heart"></i>
+                    </button>
                 </div>
             </div>
+                                                </div>
+                                            </div>
+
+    <!-- Book Details Section -->
+    <div class="info-section">
+        <h3>THÔNG TIN CHI TIẾT</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Mã Sách:</span>
+                <span class="info-value">@(Model.ISBN != null ? Model.ISBN : "Chưa cập nhật")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Nhà Xuất Bản:</span>
+                <span class="info-value">@(Model.Publisher != null ? Model.Publisher : "Chưa cập nhật")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tác Giả:</span>
+                <span class="info-value">@Model.Author</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Năm Xuất Bản:</span>
+                <span class="info-value">@(Model.PublishYear.HasValue ? Model.PublishYear.Value.ToString() : "Chưa cập nhật")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Ngôn Ngữ:</span>
+                <span class="info-value">@(Model.Language != null ? Model.Language : "Chưa cập nhật")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Số Trang:</span>
+                <span class="info-value">@(Model.PageCount.HasValue ? Model.PageCount.Value.ToString() : "Chưa cập nhật")</span>
+            </div>
+                                        </div>
+        
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="mt-4">
+                <h5>Mô tả sách:</h5>
+                <p class="description-text">@Html.Raw(Model.Description.Replace("\n", "<br/>"))</p>
+                                    </div>
+        }
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+        <h3>ĐÁNH GIÁ</h3>
+        
+        <div class="rating-summary">
+            <div class="rating-score">@Model.AverageRating.ToString("F1")/5</div>
+            <div class="rating-breakdown">
+                @{
+                    var ratingCounts = new int[6]; // 0-5 stars
+                    if (Model.Reviews != null)
+                    {
+                        foreach (var review in Model.Reviews)
+                        {
+                            ratingCounts[review.Rating]++;
+                        }
+                    }
+                }
+                
+                @for (int i = 5; i >= 1; i--)
+                {
+                    var percentage = Model.ReviewCount > 0 ? (ratingCounts[i] * 100.0 / Model.ReviewCount) : 0;
+                    <div class="rating-bar">
+                        <span class="rating-bar-label">@i</span>
+                        <div class="rating-bar-fill">
+                            <div class="rating-bar-progress" style="width: @percentage%"></div>
+                        </div>
+                        <span class="rating-bar-count">(@ratingCounts[i])</span>
+                    </div>
+                }
+            </div>
         </div>
-    </section>
+        
+        <button class="btn-write-review" onclick="showReviewModal()">
+            <i class="bi bi-pencil-square"></i>
+            Viết Đánh Giá
+        </button>
+    </div>
 </div>
 
-<div class="modal fade" id="reviewModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Viết Đánh Giá</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewModalLabel">Viết Đánh Giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body">
                 <form id="reviewForm">
-                    <input type="hidden" id="bookId" value="@Model.BookId">
+                    <input type="hidden" id="bookId" value="@Model.BookId" />
+                    
                     <div class="mb-3">
                         <label class="form-label">Đánh giá của bạn:</label>
-                        <div class="rating-input mb-2">
-                            @for (var i = 1; i <= 5; i++)
+                        <div class="rating-stars" id="ratingStars">
+                            @for (int i = 1; i <= 5; i++)
                             {
-                                <i class="bi bi-star rating-star fs-2" data-rating="@i" style="cursor: pointer; color: #ffc107;"></i>
+                                <i class="bi bi-star rating-star" data-rating="@i" style="cursor: pointer; font-size: 2rem;"></i>
                             }
                         </div>
-                        <input type="hidden" id="ratingValue" value="0">
+                        <input type="hidden" id="ratingValue" value="0" />
                     </div>
+                    
                     <div class="mb-3">
                         <label for="comment" class="form-label">Nhận xét:</label>
-                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ trải nghiệm..." required></textarea>
+                        <textarea class="form-control" id="comment" rows="4" placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" onclick="submitReview()">Gửi Đánh Giá</button></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitReview()">Gửi Đánh Giá</button>
+            </div>
         </div>
     </div>
 </div>
 
-@section scripts {
+@section Scripts {
     <script>
-        function qtyStep(n){var el=document.getElementById('qty');var max=parseInt(el.getAttribute('max'));var v=parseInt(el.value||'1',10)+n;if(v<1)v=1;if(v>max)v=max;el.value=v}
-        function addToCart(bookId){const quantity=document.getElementById('qty').value;$.post('@Url.Action("AddToCart","Cart")', {bookId,quantity},data=>{alert(data.message||'Đã thêm vào giỏ hàng!')})}
-        function buyNow(bookId){const quantity=document.getElementById('qty').value;$.post('@Url.Action("AddToCart","Cart")', {bookId,quantity},data=>{if(data.success){window.location.href='@Url.Action("Index","Cart")'}else{alert(data.message||'Có lỗi xảy ra.')}})}
-        function addToWishlist(bookId){$.post('@Url.Action("Add","Wishlist")', {bookId},data=>{alert(data.message||'Đã thêm vào danh sách yêu thích!')})}
-        function submitReview(){const rating=parseInt($('#ratingValue').val());const comment=$('#comment').val().trim();const bookId=parseInt($('#bookId').val());if(!rating||rating==0){alert('Vui lòng chọn số sao đánh giá!');return}if(!comment){alert('Vui lòng nhập nhận xét!');return}$.post('@Url.Action("AddReview","Books")', {bookId,rating,comment},data=>{if(data.success){alert('Cảm ơn bạn đã đánh giá!');location.reload()}else{alert(data.message||'Có lỗi xảy ra.')}})}
-        document.addEventListener('DOMContentLoaded',function(){const stars=document.querySelectorAll('.rating-star');const ratingValueInput=document.getElementById('ratingValue');stars.forEach(star=>{star.addEventListener('mouseover',function(){resetStars();const rating=parseInt(this.getAttribute('data-rating'));for(let i=0;i<rating;i++){stars[i].classList.replace('bi-star','bi-star-fill')}});star.addEventListener('click',function(){const rating=this.getAttribute('data-rating');ratingValueInput.value=rating})});function resetStars(){stars.forEach(s=>{s.classList.replace('bi-star-fill','bi-star')})}});
+        function qtyStep(n) {
+            var el = document.getElementById('qty');
+            var max = parseInt(el.getAttribute('max'));
+            var v = parseInt(el.value || '1', 10) + n;
+            if (v < 1) v = 1;
+            if (v > max) v = max;
+            el.value = v;
+        }
+
+        function addToCart(bookId) {
+            const quantity = document.getElementById('qty').value;
+            $.post('@Url.Action("AddToCart", "Cart")', { bookId: bookId, quantity: quantity }, function(data) {
+                if (data.success) {
+                    alert(data.message || 'Đã thêm vào giỏ hàng!');
+                    // Update cart count
+                    updateCartCount();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            }).fail(function() {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            });
+        }
+
+        function buyNow(bookId) {
+            const quantity = document.getElementById('qty').value;
+            $.post('@Url.Action("AddToCart", "Cart")', { bookId: bookId, quantity: quantity }, function(data) {
+                if (data.success) {
+                    window.location.href = '@Url.Action("Index", "Cart")';
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            }).fail(function() {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            });
+        }
+
+        function addToWishlist(bookId) {
+            $.post('@Url.Action("Add", "Wishlist")', { bookId: bookId }, function(data) {
+                alert(data.message || 'Đã thêm vào danh sách yêu thích!');
+            }).fail(function() {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            });
+        }
+
+        function showReviewModal() {
+            $('#reviewModal').modal('show');
+        }
+
+        function submitReview() {
+            const rating = parseInt($('#ratingValue').val());
+            const comment = $('#comment').val().trim();
+            const bookId = parseInt($('#bookId').val());
+
+            if (!rating || rating == 0) {
+                alert('Vui lòng chọn số sao đánh giá!');
+                return;
+            }
+
+            if (!comment) {
+                alert('Vui lòng nhập nhận xét!');
+                return;
+            }
+
+            $.post('@Url.Action("AddReview", "Books")', { bookId: bookId, rating: rating, comment: comment }, function(data) {
+                if (data.success) {
+                    alert('Cảm ơn bạn đã đánh giá!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra.');
+                }
+            }).fail(function() {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            });
+        }
+
+        function updateCartCount() {
+            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
+                $('#cartCount').text(data.count);
+            });
+        }
+
+        // Rating stars interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.rating-star');
+            const ratingValueInput = document.getElementById('ratingValue');
+
+            stars.forEach(star => {
+                star.addEventListener('mouseover', function() {
+                    resetStars();
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    for (let i = 0; i < rating; i++) {
+                        stars[i].classList.replace('bi-star', 'bi-star-fill');
+                    }
+                });
+
+                star.addEventListener('click', function() {
+                    const rating = this.getAttribute('data-rating');
+                    ratingValueInput.value = rating;
+                });
+            });
+
+            function resetStars() {
+                stars.forEach(s => {
+                    s.classList.replace('bi-star-fill', 'bi-star');
+                });
+            }
+        });
     </script>
 }

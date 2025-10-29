@@ -6,6 +6,7 @@ using WebBookStore.Data;
 using WebBookStore.Repositories;
 using WebBookStore.ViewModels;
 using WebBookStore.Models;
+using WebBookStore.Filters;
 
 namespace WebBookStore.Controllers
 {
@@ -27,7 +28,7 @@ namespace WebBookStore.Controllers
         }
 
         // GET: Cart
-        [Authorize]
+        [CustomerOnly]
         public ActionResult Index()
         {
             var userId = GetCurrentUserId();
@@ -98,7 +99,7 @@ namespace WebBookStore.Controllers
 
         // POST: Cart/UpdateQuantity
         [HttpPost]
-        [Authorize]
+        [CustomerOnly]
         public JsonResult UpdateQuantity(int cartItemId, int quantity)
         {
             var userId = GetCurrentUserId();
@@ -117,7 +118,7 @@ namespace WebBookStore.Controllers
 
         // POST: Cart/RemoveItem
         [HttpPost]
-        [Authorize]
+        [CustomerOnly]
         public JsonResult RemoveItem(int cartItemId)
         {
             var userId = GetCurrentUserId();

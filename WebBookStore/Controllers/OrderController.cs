@@ -3,10 +3,12 @@ using WebBookStore.Models;
 using WebBookStore.Services;
 using WebBookStore.Data;
 using WebBookStore.Repositories;
+using WebBookStore.Filters;
+using WebBookStore.Helpers;
 
 namespace WebBookStore.Controllers
 {
-    [Authorize]
+    [CustomerOnly]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -40,6 +42,7 @@ namespace WebBookStore.Controllers
             }
 
             ViewBag.Cart = cart;
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
             return View(new Order());
         }
 
@@ -54,6 +57,7 @@ namespace WebBookStore.Controllers
             {
                 var cart = _cartService.GetUserCart(userId);
                 ViewBag.Cart = cart;
+                ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
                 return View(order);
             }
 
@@ -61,16 +65,31 @@ namespace WebBookStore.Controllers
             {
                 var createdOrder = _orderService.CreateOrder(userId, order);
 
-                // Send confirmation email
+                // Send confirmation email to customer
                 _emailService.SendOrderConfirmation(createdOrder.Id);
+
+                // Send invoice to admin
+                _emailService.SendInvoiceToAdmin(createdOrder.Id);
+
+                // Check if this is an AJAX request
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = true, orderId = createdOrder.Id, message = "Đặt hàng thành công!" });
+                }
 
                 return RedirectToAction("Confirmation", new { id = createdOrder.Id });
             }
             catch (System.Exception ex)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
                 ModelState.AddModelError("", ex.Message);
                 var cart = _cartService.GetUserCart(userId);
                 ViewBag.Cart = cart;
+                ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
                 return View(order);
             }
         }
@@ -86,6 +105,7 @@ namespace WebBookStore.Controllers
                 return HttpNotFound();
             }
 
+            ViewBag.CurrentUser = PermissionHelper.GetCurrentUserInfo();
             return View(order);
         }
 
